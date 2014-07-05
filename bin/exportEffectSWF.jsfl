@@ -2,7 +2,7 @@ var folder = "file:///C:/Users/WorrySprite/Desktop/swordman";
 var doc;
 var tline;
 var lib;
-var pack = "com.dept8.effect.";
+var pack = "com.worrysprite.effect.";
 function init()
 {
 	if (folder != null)
@@ -60,21 +60,8 @@ function readFile(files)
 		element = tline.layers[0].frames[0].elements[i];
 		element.x = x;
 		element.y = y;
-		//doc.selection = [element];
-		//doc.breakApart();
-		//tline.layers[1].locked = true;
-		//doc.setSelectionRect({left:x, top:y, right:x + w, bottom:y + h}, true, true);
-		//doc.convertSelectionToBitmap();
-		//doc.clipCut();
-		//tline.layers[1].locked = false;
-		//tline.setSelectedLayers(1);
-		//doc.clipPaste(true);
-		//tline.setSelectedLayers(0);
-		//doc.selection = tline.layers[0].frames[0].elements;
-		//doc.deleteSelection();
-		//lib.deleteItem(itemName);
 	}
-	//tline.deleteLayer(0);
+	tline.layers[0].frames[0].actionScript = "import flash.system.Security;\nSecurity.allowDomain(\"*\");";
 	
 	index = folder.lastIndexOf("/output");
 	var folderName = folder.substring(0, index);

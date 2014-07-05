@@ -2,7 +2,7 @@ var folder = "file:///C:/Users/WorrySprite/Desktop/swordman";
 var doc;
 var tline;
 var lib;
-var pack = "com.ztstudio.action.";
+var pack = "com.worrysprite.action.";
 function init()
 {
 	if (folder != null)
@@ -82,6 +82,7 @@ function readFile(files)
 		lib.deleteItem(itemName);
 	}
 	tline.deleteLayer(0);
+	tline.layers[0].frames[0].actionScript = "import flash.system.Security;\nSecurity.allowDomain(\"*\");";
 	
 	index = folder.lastIndexOf("/");
 	var folderName = folder.substring(index + 1);

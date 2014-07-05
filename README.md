@@ -8,3 +8,5 @@ as3 animation tools
 
 特效打包可配合worrysprite的AS3库使用
 https://github.com/worrysprite/worrysprite
+
+有问题请联系worrysprite@gmail.com
