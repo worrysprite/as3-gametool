@@ -7,7 +7,7 @@
     <movie path="bin\CutPixel.swf" />
     <movie fps="30" />
     <movie width="1024" />
-    <movie height="768" />
+    <movie height="748" />
     <movie version="3" />
     <movie minorVersion="6" />
     <movie platform="AIR" />
@@ -25,6 +25,7 @@
     <option allowSourcePathOverlap="False" />
     <option benchmark="False" />
     <option es="False" />
+    <option inline="False" />
     <option locale="" />
     <option loadConfig="" />
     <option optimize="True" />
@@ -78,7 +79,7 @@
   </compileTargets>
   <!-- Paths to exclude from the Project Explorer tree -->
   <hiddenPaths>
-    <!-- example: <hidden path="..." /> -->
+    <hidden path="obj" />
   </hiddenPaths>
   <!-- Executed before build -->
   <preBuildCommand />
