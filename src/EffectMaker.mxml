@@ -22,7 +22,8 @@
 		<s:Label x="10" y="10" text="PNG文件夹" fontSize="16"/>
 		<s:TextInput id="compressPath" x="10" y="35" width="219" fontSize="14" change="onTextChange(event)" />
 		<s:Button id="pbCompressBrowse" x="235" y="35" label="浏览" height="24" fontSize="14" enabled="{processStatus == IDLE}"/>
-		<s:Button x="95" y="70" label="压缩" fontSize="14" width="99" height="25" id="pbCompress" enabled="{processStatus == IDLE}"/>
+		<s:CheckBox id="cbCompressSingle" x="10" y="70" label="合并成单个文件" enabled="{processStatus == IDLE}"/>
+		<s:Button x="155" y="70" label="压缩" fontSize="14" width="99" height="25" id="pbCompress" enabled="{processStatus == IDLE}"/>
 	</s:Panel>
 	<s:Panel id="effectMaker" x="686" y="261" width="316" height="142" title="特效打包" fontSize="16">
 		<s:Button id="pbEffectMake" x="110.3" y="71" label="打包" fontSize="14" width="99" height="25" enabled="{processStatus == IDLE}"/>

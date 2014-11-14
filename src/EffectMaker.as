@@ -387,11 +387,20 @@ private function compressHandler():void
 	var alphaData:ByteArray = new ByteArray();
 	alphaData.endian = Endian.LITTLE_ENDIAN;
 	var vec:Vector.<uint>;
+	if (cbCompressSingle.selected)
+	{
+		fs.open(file.resolvePath(file.name + ".jnp"), FileMode.WRITE);
+		fs.endian = Endian.LITTLE_ENDIAN;
+	}
+	
 	for (var i:int = 0; i < bmpList.length; ++i)
 	{
 		path = readingFiles[i];
-		fs.open(new File(path.substring(0, path.length - 4) + ".jng"), FileMode.WRITE);
-		fs.endian = Endian.LITTLE_ENDIAN;
+		if (!cbCompressSingle.selected)
+		{
+			fs.open(new File(path.substring(0, path.length - 4) + ".jng"), FileMode.WRITE);
+			fs.endian = Endian.LITTLE_ENDIAN;
+		}
 		
 		//编码jpg
 		srcBmpData = bmpList[i].bitmapData;
@@ -418,6 +427,13 @@ private function compressHandler():void
 		//写入alpha
 		fs.writeUnsignedInt(alphaData.length);
 		fs.writeBytes(alphaData);
+		if (!cbCompressSingle.selected)
+		{
+			fs.close();
+		}
+	}
+	if (cbCompressSingle.selected)
+	{
 		fs.close();
 	}
 	processStatus = IDLE;
