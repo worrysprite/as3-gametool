@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <s:WindowedApplication xmlns:fx="http://ns.adobe.com/mxml/2009"
 					   xmlns:s="library://ns.adobe.com/flex/spark"
-					   xmlns:mx="library://ns.adobe.com/flex/mx" width="1024" height="800" creationComplete="init()" backgroundColor="#E2E2E2">
+					   xmlns:mx="library://ns.adobe.com/flex/mx" width="1360" height="800" creationComplete="init()" backgroundColor="#E2E2E2">
 	<fx:Script source="EffectMaker.as"/>
 	<s:TextInput id="outputPath" x="127" y="34" fontSize="14" width="517" />
 	<s:BorderContainer width="644" height="644" left="16" top="66">
@@ -17,6 +17,12 @@
 		<s:TextInput id="actionPath" x="9" y="90" width="219" fontSize="14" change="onTextChange(event)" />
 		<s:Button id="pbActionSrc" x="235.9" y="89.55" label="浏览" height="24" fontSize="14" enabled="{processStatus == IDLE}"/>
 		<s:Label x="14" y="70" text="资源路径" fontSize="16"/>
+	</s:Panel>
+	<s:Panel id="pngCompress" x="1020" y="34" width="318" height="135" title="压缩图片" fontSize="16">
+		<s:Label x="10" y="10" text="PNG文件夹" fontSize="16"/>
+		<s:TextInput id="compressPath" x="10" y="35" width="219" fontSize="14" change="onTextChange(event)" />
+		<s:Button id="pbCompressBrowse" x="235" y="35" label="浏览" height="24" fontSize="14" enabled="{processStatus == IDLE}"/>
+		<s:Button x="95" y="70" label="压缩" fontSize="14" width="99" height="25" id="pbCompress" enabled="{processStatus == IDLE}"/>
 	</s:Panel>
 	<s:Panel id="effectMaker" x="686" y="261" width="316" height="142" title="特效打包" fontSize="16">
 		<s:Button id="pbEffectMake" x="110.3" y="71" label="打包" fontSize="14" width="99" height="25" enabled="{processStatus == IDLE}"/>

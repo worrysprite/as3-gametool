@@ -8,8 +8,12 @@ import flash.filesystem.FileStream;
 import flash.geom.Matrix;
 import flash.geom.Point;
 import flash.geom.Rectangle;
+import flash.utils.ByteArray;
+import flash.utils.CompressionAlgorithm;
+import flash.utils.Endian;
 import mx.collections.ArrayCollection;
 import mx.controls.Alert;
+import mx.graphics.codec.JPEGEncoder;
 import mx.graphics.codec.PNGEncoder;
 import spark.components.TextInput;
 
@@ -18,6 +22,7 @@ private static const MAKING_ACTION:String = "making_action";
 private static const MAKING_EFFECT:String = "making_effect";
 private static const CUTTING_JPG:String = "cutting_jpg";
 private static const SCALING_BITMAP:String = "scaling_bitmap";
+private static const COMPRESS:String = "compress";
 
 private static const ATTACK:String = "attack";
 private static const RUN:String = "run";
@@ -88,6 +93,10 @@ private function onClick(e:MouseEvent):void
 			selectingPath = scalePath;
 			file.browseForDirectory("选择文件夹");
 			break;
+		case pbCompressBrowse:
+			selectingPath = compressPath;
+			file.browseForDirectory("选择文件夹");
+			break;
 		case pbJpgCut:
 			break;
 		case pbJpgMake:
@@ -97,6 +106,9 @@ private function onClick(e:MouseEvent):void
 			break;
 		case pbScale:
 			scaleBitmap();
+			break;
+		case pbCompress:
+			compressPNG();
 			break;
 	}
 }
@@ -138,6 +150,7 @@ private function makeAction():void
 			readFile(new File(file.url + "/" + ACTION[actionStep]));
 			actionStep++;
 		}
+		LoadQueue.getInstance().loadImageList(readingFiles);
 	}
 }
 
@@ -155,6 +168,7 @@ private function makeEffect():void
 		modifyJSFL(file.url);
 		readingFiles = new Vector.<String>();
 		readFile(file);
+		LoadQueue.getInstance().loadImageList(readingFiles);
 	}
 }
 
@@ -165,29 +179,41 @@ private function scaleBitmap():void
 	if (file.exists)
 	{
 		readingFiles = new Vector.<String>();
-		readFile(file);
+		readFile(file, null, true);
+		LoadQueue.getInstance().loadImageList(readingFiles);
 	}
 }
 
-private function readFile(dir:File):Boolean
+private function readFile(dir:File, ext:Vector.<String> = null, recursion:Boolean = false):Boolean
 {
 	if (!dir || !dir.exists || !dir.isDirectory)
 	{
 		return false;
 	}
+	if (ext == null)
+	{
+		ext = new <String>[".png"];
+	}
+	
 	var content:Array = dir.getDirectoryListing();
 	var url:String;
-	var fileList:Vector.<String> = new Vector.<String>();
+	var file:File;
 	for (var i:int = 0; i < content.length; i++)
 	{
-		url = content[i].url;
-		if (url.length > 4 && url.substr(url.length - 4) == ".png")
+		file = content[i];
+		if (recursion && file.isDirectory)
 		{
-			fileList.push(url);
-			readingFiles.push(url);
+			readFile(file, ext, recursion);
+		}
+		else
+		{
+			url = file.url;
+			if (url.length > 4 && ext.indexOf(url.substr(url.length - 4)) >= 0)
+			{
+				readingFiles.push(url);
+			}
 		}
 	}
-	LoadQueue.getInstance().loadImageList(fileList);
 	return true;
 }
 
@@ -206,6 +232,9 @@ private function onImageLoaded(evt:Event):void
 			break;
 		case SCALING_BITMAP:
 			scaleBitmapHandler();
+			break;
+		case COMPRESS:
+			compressHandler();
 			break;
 	}
 }
@@ -329,4 +358,67 @@ private function modifyJSFL(url:String):void
 	fs.truncate();
 	fs.writeUTFBytes(content);
 	fs.close();
+}
+
+private function compressPNG():void
+{
+	processStatus = COMPRESS;
+	LoadQueue.getInstance().completeList.length = 0;
+	if (file.exists)
+	{
+		readingFiles = new Vector.<String>();
+		if (readFile(file))
+		{
+			LoadQueue.getInstance().loadImageList(readingFiles);
+		}
+	}
+}
+
+private function compressHandler():void
+{
+	var bmpList:Vector.<Bitmap> = Vector.<Bitmap>(LoadQueue.getInstance().completeList);
+	var srcBmpData:BitmapData;
+	var fs:FileStream = new FileStream();
+	var encoder:JPEGEncoder = new JPEGEncoder(80);
+	var path:String;
+	var jpgData:ByteArray;
+	var data:ByteArray = new ByteArray();
+	data.endian = Endian.LITTLE_ENDIAN;
+	var alphaData:ByteArray = new ByteArray();
+	alphaData.endian = Endian.LITTLE_ENDIAN;
+	var vec:Vector.<uint>;
+	for (var i:int = 0; i < bmpList.length; ++i)
+	{
+		path = readingFiles[i];
+		fs.open(new File(path.substring(0, path.length - 4) + ".jng"), FileMode.WRITE);
+		fs.endian = Endian.LITTLE_ENDIAN;
+		
+		//编码jpg
+		srcBmpData = bmpList[i].bitmapData;
+		data.clear();
+		data.writeShort(srcBmpData.width);
+		data.writeShort(srcBmpData.height);
+		jpgData = encoder.encode(srcBmpData);
+		data.writeBytes(jpgData);
+		
+		//写入jpg
+		fs.writeUnsignedInt(data.length);
+		data.compress();
+		fs.writeUnsignedInt(data.length);
+		fs.writeBytes(data);
+		
+		//编码alpha
+		alphaData.clear();
+		vec = srcBmpData.getVector(srcBmpData.rect);
+		for (var j:int = 0; j < vec.length; ++j)
+		{
+			alphaData.writeByte(vec[j] >> 24);
+		}
+		alphaData.compress();
+		//写入alpha
+		fs.writeUnsignedInt(alphaData.length);
+		fs.writeBytes(alphaData);
+		fs.close();
+	}
+	processStatus = IDLE;
 }

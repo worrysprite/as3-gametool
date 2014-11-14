@@ -61,7 +61,7 @@ package
 		
 		public function loadImageList(urlList:Vector.<String>):void
 		{
-			loadList = loadList.concat(urlList);
+			loadList = urlList.slice();
 			if (idle)
 			{
 				loadNext();

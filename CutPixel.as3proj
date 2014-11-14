@@ -6,7 +6,7 @@
     <movie input="" />
     <movie path="bin\CutPixel.swf" />
     <movie fps="30" />
-    <movie width="1024" />
+    <movie width="1360" />
     <movie height="748" />
     <movie version="3" />
     <movie minorVersion="6" />
