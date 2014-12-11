@@ -7,9 +7,9 @@
 :: NOTICE: all paths are relative to project root
 
 :: Your certificate information
-set CERT_NAME="CutPixel"
+set CERT_NAME="worryspriteTools"
 set CERT_PASS=fd
-set CERT_FILE="bat\CutPixel.p12"
+set CERT_FILE="bat\worryspriteTools.p12"
 set SIGNING_OPTIONS=-storetype pkcs12 -keystore %CERT_FILE% -storepass %CERT_PASS%
 
 :: Application descriptor
@@ -20,11 +20,11 @@ set APP_DIR=bin
 set FILE_OR_DIR=-C %APP_DIR% .
 
 :: Your application ID (must match <id> of Application descriptor)
-set APP_ID=CutPixel
+set APP_ID=worryspriteTools
 
 :: Output
 set AIR_PATH=air
-set AIR_NAME=CutPixel
+set AIR_NAME=worryspriteTools
 
 
 :validation
@@ -34,8 +34,8 @@ goto end
 
 :badid
 echo.
-echo ERROR: 
-echo   Application ID in 'bat\SetupApplication.bat' (APP_ID) 
+echo ERROR:
+echo   Application ID in 'bat\SetupApplication.bat' (APP_ID)
 echo   does NOT match Application descriptor '%APP_XML%' (id)
 echo.
 if %PAUSE_ERRORS%==1 pause

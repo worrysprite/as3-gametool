@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:NavigatorContent xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					xmlns:s="library://ns.adobe.com/flex/spark" 
+					xmlns:mx="library://ns.adobe.com/flex/mx"
+					label="地图切片" width="530" height="576">
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	<s:Label left="20" top="18" styleName="BigFont" text="资源路径"/>
+	<s:TextInput id="txSrc" left="98" top="15" width="310"/>
+	<s:Button id="pbBrowseSrc" left="433" top="15" label="浏览" styleName="BigFont"/>
+	
+	<s:Label x="20" y="51" styleName="BigFont" text="输出路径"/>
+	<s:TextInput id="txDest" left="98" top="48" width="310"/>
+	<s:Button id="pbBrowseDest" x="433" y="49" label="浏览" styleName="BigFont"/>
+	<s:CheckBox left="20" top="73" label="使用源路径" styleName="BigFont"/>
+	
+	<mx:HRule y="104" width="500" horizontalCenter="0"/>
+	<s:Label left="20" top="115" styleName="BigFont" text="压缩品质"/>
+	<s:HSlider id="hsQuality" left="98" top="118" width="310" maximum="101" minimum="1" value="80"/>
+	<s:TextInput id="txQuality" left="433" top="111" width="70" text="80" textAlign="center"/>
+	
+	<s:Label left="20" top="145" styleName="BigFont" text="切片宽"/>
+	<s:TextInput left="78" top="140" width="80"/>
+	<s:Label left="171" top="145" styleName="BigFont" text="切片高"/>
+	<s:TextInput left="230" top="140" width="80"/>
+	
+	<s:Button top="175" width="100" height="30" label="切割" horizontalCenter="0"
+			  styleName="BigFont"/>
+	<fx:Script>
+		<![CDATA[
+			[Bindable]
+			private var isUseSrcPath:Boolean;
+			[Bindable]
+			private var quality:int = 80;
+			
+			private function onClick(e:MouseEvent):void
+			{
+				
+			}
+			
+			private function onQualityChange(event:Event):void
+			{
+				if(event.target == txQuality)
+				{
+					var value:int = int(txQuality.text);
+					if(value<1)
+					{
+						value=1;
+					}
+					else if(value>101)
+					{
+						value=101;
+					}
+					quality=value;
+				}
+				else if(event.target == hsQuality)
+				{
+					quality = hsQuality.value;
+					if(quality<101)
+					{
+						txQuality.text = quality.toString();
+					}
+				}
+				if(quality==101)
+				{
+					txQuality.text = "无损";
+				}
+			}
+		]]>
+	</fx:Script>
+</s:NavigatorContent>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:NavigatorContent xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					xmlns:s="library://ns.adobe.com/flex/spark" 
+					xmlns:mx="library://ns.adobe.com/flex/mx"
+					label="图片缩放" width="530" height="576">
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	<s:Label left="20" top="18" styleName="BigFont" text="资源路径"/>
+	<s:TextInput left="98" top="15" width="310"/>
+	<s:Button left="433" top="15" label="浏览" styleName="BigFont"/>
+	<s:Label left="20" top="115" styleName="BigFont" text="压缩品质"/>
+	<s:HSlider left="98" top="118" width="310" maximum="100" minimum="1" value="80"/>
+	<s:TextInput left="433" top="111" width="70" text="80" textAlign="center"/>
+	<s:Label x="20" y="51" styleName="BigFont" text="输出路径"/>
+	<s:TextInput left="98" top="48" width="310"/>
+	<s:Button x="433" y="49" label="浏览" styleName="BigFont"/>
+	<s:CheckBox left="20" top="73" label="直接覆盖原文件" styleName="BigFont"/>
+	<mx:HRule y="104" width="500" horizontalCenter="0"/>
+	<s:Button top="175" width="100" height="30" label="缩放" horizontalCenter="0"
+			  styleName="BigFont"/>
+	<s:Label left="20" top="145" styleName="BigFont" text="缩放百分比"/>
+	<s:NumericStepper left="110" top="140" width="80" maximum="500" minimum="5" value="50" />
+</s:NavigatorContent>

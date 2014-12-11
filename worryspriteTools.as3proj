@@ -4,19 +4,18 @@
   <output>
     <movie outputType="Application" />
     <movie input="" />
-    <movie path="bin\CutPixel.swf" />
+    <movie path="bin\worryspriteTools.swf" />
     <movie fps="30" />
     <movie width="1360" />
     <movie height="748" />
     <movie version="3" />
-    <movie minorVersion="6" />
+    <movie minorVersion="9" />
     <movie platform="AIR" />
     <movie background="#FFFFFF" />
   </output>
   <!-- Other classes to be compiled into your SWF -->
   <classpaths>
     <class path="src" />
-    <class path="C:\Program Files (x86)\FlashDevelop\Tools\flexsdk\frameworks\libs\mx" />
   </classpaths>
   <!-- Build options -->
   <build>
@@ -43,7 +42,7 @@
     <option linkReport="" />
     <option loadExterns="" />
     <option staticLinkRSL="True" />
-    <option additional="+configname=air" />
+    <option additional="+configname=air&#xA;-swf-version=22&#xA;-target-player=11.9" />
     <option compilerConstants="" />
     <option minorVersion="" />
   </build>
@@ -53,8 +52,9 @@
   </includeLibraries>
   <!-- SWC Libraries -->
   <libraryPaths>
-    <element path="" />
     <element path="C:\Program Files (x86)\FlashDevelop\Tools\flexsdk\frameworks\libs\mx\mx.swc" />
+    <element path="" />
+    <element path="libs\worrysprite.swc" />
   </libraryPaths>
   <!-- External Libraries -->
   <externalLibraryPaths>
@@ -75,7 +75,7 @@
   </library>
   <!-- Class files to compile (other referenced classes will automatically be included) -->
   <compileTargets>
-    <compile path="src\EffectMaker.mxml" />
+    <compile path="src\Main.mxml" />
   </compileTargets>
   <!-- Paths to exclude from the Project Explorer tree -->
   <hiddenPaths>

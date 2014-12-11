@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:WindowedApplication xmlns:fx="http://ns.adobe.com/mxml/2009"
+					   xmlns:s="library://ns.adobe.com/flex/spark"
+					   xmlns:mx="library://ns.adobe.com/flex/mx"
+					   width="530" height="600" backgroundColor="#E6E6E6" xmlns:view="view.*"
+					   creationComplete="init()">
+	<fx:Style source="FontStyle.css"/>
+	<fx:Declarations>
+		<s:RadioButtonGroup id="radiogroup1"/>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	<s:TabBar id="mainTab" left="0" top="0" dataProvider="{pages}" selectedIndex="0" styleName="BigFont"/>
+	<mx:ViewStack id="pages" left="0" right="0" top="24" bottom="0" borderStyle="none"
+				  borderVisible="true" cornerRadius="0" dropShadowVisible="false">
+		<view:EffectPackPage />
+		<view:MapCutterPage />
+		<view:CompressPNGPage />
+		<view:BitmapScalePage />
+		<view:EffectPreviewPage />
+	</mx:ViewStack>
+	<fx:Script>
+		<![CDATA[
+			import com.worrysprite.manager.HeartbeatManager;
+			
+			private function init():void
+			{
+				WorkerManager.init();
+				addEventListener(Event.ADDED_TO_STAGE, onAdded);
+			}
+			
+			private function onAdded(e:Event):void
+			{
+				removeEventListener(Event.ADDED_TO_STAGE, onAdded);
+				HeartbeatManager.init(stage);
+			}
+		]]>
+	</fx:Script>
+</s:WindowedApplication>
