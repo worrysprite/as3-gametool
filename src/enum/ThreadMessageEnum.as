@@ -14,8 +14,7 @@ package enum
 		 */
 		public static const STATE_PROGRESS:int = 1;
 		/**
-		 * 后台完成消息，含有1个参数：
-		 * Boolean	是否成功
+		 * 后台完成消息
 		 */
 		public static const STATE_COMPLETE:int = 2;
 		/**
@@ -32,6 +31,15 @@ package enum
 		 * Boolean	合并为单个文件
 		 */
 		public static const COMMAND_COMPRESS_PNG:int = 101;
+		/**
+		 * 切割图片消息，含有5个参数
+		 * String	源文件夹url
+		 * String	目标文件夹url
+		 * int	切片宽
+		 * int	切片高
+		 * int	品质
+		 */
+		public static const COMMAND_CUT_MAP:int = 102;
 	}
 
 }

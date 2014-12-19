@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<s:NavigatorContent xmlns:fx="http://ns.adobe.com/mxml/2009" 
-					xmlns:s="library://ns.adobe.com/flex/spark" 
+<s:NavigatorContent xmlns:fx="http://ns.adobe.com/mxml/2009"
+					xmlns:s="library://ns.adobe.com/flex/spark"
 					xmlns:mx="library://ns.adobe.com/flex/mx"
 					label="动作/特效打包" width="530" height="576"
 					creationComplete="onCreate(event)">
@@ -9,20 +9,24 @@
 	</fx:Declarations>
 	<s:Label left="20" top="18" styleName="BigFont" text="资源路径"/>
 	<s:TextInput id="txSrc" left="98" top="15" width="310"/>
-	<s:Button id="pbBrowseSrc" left="433" top="15" label="浏览" styleName="BigFont" click="onClick(event)"/>
+	<s:Button id="pbBrowseSrc" left="433" top="15" label="浏览" styleName="BigFont" click="onBrowseClick(event)"/>
 	
 	<s:Label x="20" y="51" styleName="BigFont" text="输出路径"/>
-	<s:TextInput id="txDest" left="98" top="48" width="310"/>
-	<s:Button id="pbBrowseDest" x="433" y="49" label="浏览" styleName="BigFont" click="onClick(event)"/>
-	<s:CheckBox id="cbUseSrcDir" left="20" top="73" label="使用源路径" styleName="BigFont"/>
+	<s:TextInput id="txDest" left="98" top="48" width="310" enabled="{!isUseSrcPath}"/>
+	<s:Button id="pbBrowseDest" x="433" y="49" label="浏览" styleName="BigFont"
+			  click="onBrowseClick(event)" enabled="{!isUseSrcPath}"/>
+	<s:CheckBox id="cbUseSrcDir" left="20" top="73" label="使用源路径" styleName="BigFont" change="{isUseSrcPath = !isUseSrcPath}"/>
 	
 	<mx:HRule y="104" width="500" horizontalCenter="0"/>
 	
 	<s:Label left="20" top="115" styleName="BigFont" text="压缩品质"/>
-	<s:HSlider id="hsQuality" left="98" top="118" width="310" maximum="101" minimum="1" value="80"/>
-	<s:TextInput id="txQuality" left="433" top="111" width="70" text="80" textAlign="center"/>
+	<s:HSlider id="hsQuality" left="98" top="118" width="310" maximum="101" minimum="1"
+			   value="{quality}" change="onQualityChange(event)" />
+	<s:TextInput id="txQuality" left="433" top="111" width="70" text="80" textAlign="center" restrict="0-9"
+				 change="onQualityChange(event)" />
 	
-	<s:RadioButton id="rbAction" left="20" top="142" label="动作打包" selected="{type==TYPE_ACTION}" styleName="BigFont" click="onClick(event)" />
+	<s:RadioButton id="rbAction" left="20" top="142" label="动作打包" selected="{type==TYPE_ACTION}"
+				   styleName="BigFont" click="onRadioButtonClick(event)" />
 	<s:BorderContainer top="172" width="490" height="250" borderVisible="true"
 					   dropShadowVisible="true" horizontalCenter="0">
 		<s:DataGrid id="dgAction" x="16" y="12" width="450" height="130" requestedRowCount="4" enabled="{type==TYPE_ACTION}">
@@ -45,11 +49,12 @@
 		<s:TextInput id="txActionDirectory" x="157" y="176" enabled="{type==TYPE_ACTION}"/>
 		<s:TextInput id="txActionDirection" x="297" y="176" width="60" enabled="{type==TYPE_ACTION}"/>
 		<s:TextInput id="txActionInterval" x="368" y="176" width="100" enabled="{type==TYPE_ACTION}"/>
-		<s:Button id="pbAddAction" x="124" y="212" label="新增动作" styleName="BigFont" enabled="{type==TYPE_ACTION}"/>
-		<s:Button id="pbRemoveAction" x="286" y="212" label="删除动作" styleName="BigFont" enabled="{type==TYPE_ACTION}"/>
+		<s:Button id="pbAddAction" x="124" y="212" label="新增动作" styleName="BigFont" enabled="{type==TYPE_ACTION}" click="addAction()"/>
+		<s:Button id="pbRemoveAction" x="286" y="212" label="删除动作" styleName="BigFont" enabled="{type==TYPE_ACTION}" click="removeAction()"/>
 	</s:BorderContainer>
 	
-	<s:RadioButton id="rbEffect" left="20" top="432" label="特效打包" styleName="BigFont" selected="{type==TYPE_EFFECT}" click="onClick(event)"/>
+	<s:RadioButton id="rbEffect" left="20" top="432" label="特效打包" styleName="BigFont"
+				   selected="{type==TYPE_EFFECT}" click="onRadioButtonClick(event)"/>
 	<s:BorderContainer top="462" width="490" height="45" dropShadowVisible="true"
 					   horizontalCenter="0">
 		<s:Label x="10" y="13" styleName="BigFont" text="帧间隔(毫秒)"/>
@@ -57,10 +62,13 @@
 	</s:BorderContainer>
 	
 	<s:Button id="pbPack" top="521" width="100" height="30" label="打包" horizontalCenter="0"
-			  styleName="BigFont"/>
+			  styleName="BigFont" click="startPack()"/>
 	<fx:Script>
 		<![CDATA[
+			import mx.controls.Alert;
 			import mx.events.FlexEvent;
+			
+			import spark.events.TextOperationEvent;
 			
 			private static const TYPE_ACTION:int = 1;
 			private static const TYPE_EFFECT:int = 2;
@@ -75,6 +83,8 @@
 			
 			private var srcDir:File;
 			private var destDir:File;
+			
+			private var popup:ProgressPanel;
 			
 			private function onCreate(event:FlexEvent):void
 			{
@@ -96,7 +106,7 @@
 				}
 			}
 			
-			private function onClick(event:MouseEvent):void
+			private function onRadioButtonClick(event:MouseEvent):void
 			{
 				switch(event.currentTarget)
 				{
@@ -110,6 +120,98 @@
 				}
 			}
 			
+			private function onBrowseClick(event:MouseEvent):void
+			{
+				switch(event.currentTarget)
+				{
+					case pbBrowseSrc:
+						break;
+					
+					case pbBrowseDest:
+						break;
+				}
+			}
+			
+			private function onQualityChange(event:Event):void
+			{
+				switch (event.currentTarget)
+				{
+					case txQuality:
+						var value:int = int(txQuality.text);
+						if (value < 1)
+						{
+							value = 1;
+						}
+						else if(value > 101)
+						{
+							value = 101;
+						}
+						quality = value;
+						break;
+					
+					case hsQuality:
+						quality = hsQuality.value;
+						break;
+				}
+				if (quality == 101)
+				{
+					txQuality.text = "无损";
+				}
+				else
+				{
+					txQuality.text = quality.toString();
+				}
+			}
+			
+			private function checkDir(dir:File, path:String, tip:String):Boolean
+			{
+				try
+				{
+					dir.nativePath = path;
+					if (!dir.exists || !dir.isDirectory)
+					{
+						dir.url = path;
+					}
+					if (!dir.exists || !dir.isDirectory)
+					{
+						Alert.show(tip, "错误");
+						return false;
+					}
+				}
+				catch (err:Error)
+				{
+					Alert.show(tip, "错误");
+					return false;
+				}
+				return true;
+			}
+			
+			private function addAction():void
+			{
+				if (!checkDir(srcDir, txSrc.text, "请先指定有效的资源路径"))
+				{
+					return;
+				}
+				var actionDir:File = srcDir.resolvePath(txActionDirectory.text);
+				if (actionDir.exists && actionDir.isDirectory)
+				{
+					
+				}
+				else
+				{
+					Alert.show("", "错误");
+				}
+			}
+			
+			private function removeAction():void
+			{
+				
+			}
+			
+			private function startPack():void
+			{
+				
+			}
 		]]>
 	</fx:Script>
 </s:NavigatorContent>

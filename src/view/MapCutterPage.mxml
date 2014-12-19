@@ -1,72 +1,186 @@
 <?xml version="1.0" encoding="utf-8"?>
-<s:NavigatorContent xmlns:fx="http://ns.adobe.com/mxml/2009" 
-					xmlns:s="library://ns.adobe.com/flex/spark" 
+<s:NavigatorContent xmlns:fx="http://ns.adobe.com/mxml/2009"
+					xmlns:s="library://ns.adobe.com/flex/spark"
 					xmlns:mx="library://ns.adobe.com/flex/mx"
-					label="地图切片" width="530" height="576">
+					label="地图切片" width="530" height="576" creationComplete="onCreate(event)">
 	<fx:Declarations>
 		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
 	</fx:Declarations>
 	<s:Label left="20" top="18" styleName="BigFont" text="资源路径"/>
 	<s:TextInput id="txSrc" left="98" top="15" width="310"/>
-	<s:Button id="pbBrowseSrc" left="433" top="15" label="浏览" styleName="BigFont"/>
+	<s:Button id="pbBrowseSrc" left="433" top="15" label="浏览" styleName="BigFont" click="onClick(event)"/>
 	
 	<s:Label x="20" y="51" styleName="BigFont" text="输出路径"/>
-	<s:TextInput id="txDest" left="98" top="48" width="310"/>
-	<s:Button id="pbBrowseDest" x="433" y="49" label="浏览" styleName="BigFont"/>
-	<s:CheckBox left="20" top="73" label="使用源路径" styleName="BigFont"/>
+	<s:TextInput id="txDest" left="98" top="48" width="310" enabled="{!isUseSrcPath}"/>
+	<s:Button id="pbBrowseDest" x="433" y="49" label="浏览" styleName="BigFont" click="onClick(event)" enabled="{!isUseSrcPath}"/>
+	<s:CheckBox left="20" top="73" label="使用源路径" styleName="BigFont" change="{isUseSrcPath = !isUseSrcPath}" />
 	
 	<mx:HRule y="104" width="500" horizontalCenter="0"/>
 	<s:Label left="20" top="115" styleName="BigFont" text="压缩品质"/>
-	<s:HSlider id="hsQuality" left="98" top="118" width="310" maximum="101" minimum="1" value="80"/>
-	<s:TextInput id="txQuality" left="433" top="111" width="70" text="80" textAlign="center"/>
+	<s:HSlider id="hsQuality" left="98" top="118" width="310" maximum="101" minimum="1"
+			   value="{quality}" change="onQualityChange(event)"/>
+	<s:TextInput id="txQuality" left="433" top="111" width="70" text="80" textAlign="center" restrict="0-9"
+				 change="onQualityChange(event)"/>
 	
 	<s:Label left="20" top="145" styleName="BigFont" text="切片宽"/>
-	<s:TextInput left="78" top="140" width="80"/>
+	<s:TextInput id="txPieceWidth" left="78" top="140" width="80" restrict="0-9" text="200" change="onSizeChange(event)"/>
 	<s:Label left="171" top="145" styleName="BigFont" text="切片高"/>
-	<s:TextInput left="230" top="140" width="80"/>
+	<s:TextInput id="txPieceHeight" left="230" top="140" width="80" restrict="0-9" text="200" change="onSizeChange(event)"/>
 	
-	<s:Button top="175" width="100" height="30" label="切割" horizontalCenter="0"
-			  styleName="BigFont"/>
+	<s:Button id="pbSplit" top="175" width="100" height="30" label="切割" horizontalCenter="0"
+			  styleName="BigFont" click="onClick(event)" />
 	<fx:Script>
 		<![CDATA[
+			import com.worrysprite.utils.FileUtils;
+			import enum.ThreadMessageEnum;
+			import events.ThreadEvent;
+			import flash.events.Event;
+			import flash.filesystem.File;
+			import flash.net.FileFilter;
+			import mx.controls.Alert;
+			import mx.events.FlexEvent;
+			import mx.managers.PopUpManager;
+			import spark.components.TextInput;
+			import spark.events.TextOperationEvent;
+			
+			private static const MIN_PIECE_SIZE:int = 1;
+			private static const MAX_PIECE_SIZE:int = 1000;
+			
 			[Bindable]
 			private var isUseSrcPath:Boolean;
 			[Bindable]
 			private var quality:int = 80;
 			
+			private var srcImageFile:File;
+			private var destDir:File;
+			
+			private var popup:ProgressPanel;
+			
+			private function onCreate(event:FlexEvent):void
+			{
+				srcImageFile = new File();
+				srcImageFile.addEventListener(Event.SELECT, onFileSelected);
+				destDir = new File();
+				destDir.addEventListener(Event.SELECT, onFileSelected);
+			}
+			
+			private function onFileSelected(e:Event):void
+			{
+				if(e.currentTarget == srcImageFile)
+				{
+					txSrc.text = srcImageFile.nativePath;
+				}
+				else if(e.currentTarget == destDir)
+				{
+					txDest.text = destDir.nativePath;
+				}
+			}
+			
 			private function onClick(e:MouseEvent):void
 			{
-				
+				switch (e.target)
+				{
+					case pbBrowseSrc:
+						srcImageFile.browseForOpen("选择图片文件", [new FileFilter("Images", "*.jpg;*.png")]);
+						break;
+					
+					case pbBrowseDest:
+						destDir.browseForDirectory("选择输出目录");
+						break;
+					
+					case pbSplit:
+						split();
+						break;
+				}
 			}
 			
 			private function onQualityChange(event:Event):void
 			{
-				if(event.target == txQuality)
+				switch (event.currentTarget)
 				{
-					var value:int = int(txQuality.text);
-					if(value<1)
-					{
-						value=1;
-					}
-					else if(value>101)
-					{
-						value=101;
-					}
-					quality=value;
+					case txQuality:
+						var value:int = int(txQuality.text);
+						if (value < 1)
+						{
+							value = 1;
+						}
+						else if(value > 101)
+						{
+							value = 101;
+						}
+						quality = value;
+						break;
+					
+					case hsQuality:
+						quality = hsQuality.value;
+						break;
 				}
-				else if(event.target == hsQuality)
-				{
-					quality = hsQuality.value;
-					if(quality<101)
-					{
-						txQuality.text = quality.toString();
-					}
-				}
-				if(quality==101)
+				if (quality == 101)
 				{
 					txQuality.text = "无损";
 				}
+				else
+				{
+					txQuality.text = quality.toString();
+				}
 			}
+			
+			private function split():void
+			{
+				if (!FileUtils.checkFileValid(txSrc.text, ["png", "jpg"], srcImageFile))
+				{
+					Alert.show("无效的源图片路径", "错误");
+					return;
+				}
+				if (isUseSrcPath)
+				{
+					destDir.url = srcImageFile.resolvePath("..").url
+				}
+				else
+				{
+					if (!FileUtils.checkDirValid(txDest.text, destDir))
+					{
+						Alert.show("无效的输出路径", "错误");
+						return;
+					}
+				}
+				popup = PopUpManager.createPopUp(this, ProgressPanel, true) as ProgressPanel;
+				PopUpManager.centerPopUp(popup);
+				
+				WorkerManager.listener.addEventListener(ThreadEvent.THREAD_STATE, onState);
+				WorkerManager.sendMessage([ThreadMessageEnum.COMMAND_CUT_MAP, srcImageFile.url,
+									destDir.url, int(txPieceWidth.text), int(txPieceHeight.text), hsQuality.value]);
+			}
+			
+			private function onSizeChange(e:TextOperationEvent):void
+			{
+				var textInput:TextInput = e.currentTarget as TextInput;
+				if (int(textInput.text) < MIN_PIECE_SIZE)
+				{
+					textInput.text = MIN_PIECE_SIZE.toString();
+				}
+				else if (int(textInput.text) > MAX_PIECE_SIZE)
+				{
+					textInput.text = MAX_PIECE_SIZE.toString();
+				}
+			}
+			
+			private function onState(e:ThreadEvent):void
+			{
+				var msg:Array = e.msg;
+				switch(msg[0])
+				{
+					case ThreadMessageEnum.STATE_PROGRESS:
+						popup.setProgressInfo(msg[1], msg[2], msg[3]);
+						break;
+					
+					case ThreadMessageEnum.STATE_COMPLETE:
+						PopUpManager.removePopUp(popup);
+						popup = null;
+						break;
+				}
+			}
+			
 		]]>
 	</fx:Script>
 </s:NavigatorContent>

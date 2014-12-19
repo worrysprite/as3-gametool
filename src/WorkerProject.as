@@ -1,6 +1,7 @@
 package
 {
 	import controller.CompressPNGController;
+	import controller.CutBitmapController;
 	import enum.ThreadMessageEnum;
 	import flash.display.Sprite;
 	import flash.events.Event;
@@ -38,6 +39,10 @@ package
 				{
 					case ThreadMessageEnum.COMMAND_COMPRESS_PNG:
 						CompressPNGController.compress(msg[1], msg[2], msg[3], msg[4]);
+						break;
+						
+					case ThreadMessageEnum.COMMAND_CUT_MAP:
+						CutBitmapController.split(msg[1], msg[2], msg[3], msg[4], msg[5]);
 						break;
 				}
 			}

@@ -30,14 +30,12 @@
 	<s:CheckBox id="cbSingleFile" left="180" top="73" label="合并为单个文件" styleName="BigFont"/>
 	<fx:Script>
 		<![CDATA[
+			import com.worrysprite.utils.FileUtils;
 			import enum.ThreadMessageEnum;
-			
 			import events.ThreadEvent;
-			
 			import mx.controls.Alert;
 			import mx.events.FlexEvent;
 			import mx.managers.PopUpManager;
-			
 			import spark.events.TextOperationEvent;
 			
 			[Bindable]
@@ -103,41 +101,11 @@
 				txQuality.text = quality.toString();
 			}
 			
-			private function checkDir(dir:File, path:String, tip:String):Boolean
-			{
-				try
-				{
-					dir.nativePath = path;
-				}
-				catch (err:Error)
-				{
-					Alert.show(tip, "错误", Alert.OK);
-					return false;
-				}
-				if (!dir.exists)
-				{
-					try
-					{
-						dir.url = path;
-					}
-					catch (err:Error)
-					{
-						Alert.show(tip, "错误", Alert.OK);
-						return false;
-					}
-				}
-				if (!dir.exists || !dir.isDirectory)
-				{
-					Alert.show(tip, "错误", Alert.OK);
-					return false;
-				}
-				return true;
-			}
-			
 			private function compress():void
 			{
-				if (!checkDir(srcDir, txSrc.text, "无效的资源路径"))
+				if (!FileUtils.checkDirValid(txSrc.text, srcDir))
 				{
+					Alert.show("无效的资源路径", "错误");
 					return;
 				}
 				if (isUseSrcPath)
@@ -146,8 +114,9 @@
 				}
 				else
 				{
-					if (!checkDir(destDir, txDest.text, "无效的输出路径"))
+					if (!FileUtils.checkDirValid(txDest.text, destDir))
 					{
+						Alert.show("无效的输出路径", "错误");
 						return;
 					}
 				}
