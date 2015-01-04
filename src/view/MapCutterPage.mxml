@@ -177,6 +177,7 @@
 					case ThreadMessageEnum.STATE_COMPLETE:
 						PopUpManager.removePopUp(popup);
 						popup = null;
+						WorkerManager.listener.removeEventListener(ThreadEvent.THREAD_STATE, onState);
 						break;
 				}
 			}

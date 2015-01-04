@@ -7,17 +7,17 @@ package model
 	public class ActionVo
 	{
 		/**
+		 * 索引
+		 */
+		public var index:int;
+		/**
 		 * 动作名称
 		 */
 		public var name:String;
 		/**
-		 * 资源文件夹
+		 * 资源路径
 		 */
-		public var dirURL:String;
-		/**
-		 * 方向
-		 */
-		public var direction:int;
+		public var directory:String;
 		/**
 		 * 帧间隔(毫秒)
 		 */
@@ -27,7 +27,5 @@ package model
 		{
 			
 		}
-		
 	}
-
 }

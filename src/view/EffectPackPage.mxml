@@ -10,49 +10,47 @@
 	<s:Label left="20" top="18" styleName="BigFont" text="资源路径"/>
 	<s:TextInput id="txSrc" left="98" top="15" width="310"/>
 	<s:Button id="pbBrowseSrc" left="433" top="15" label="浏览" styleName="BigFont" click="onBrowseClick(event)"/>
-	
+
 	<s:Label x="20" y="51" styleName="BigFont" text="输出路径"/>
 	<s:TextInput id="txDest" left="98" top="48" width="310" enabled="{!isUseSrcPath}"/>
 	<s:Button id="pbBrowseDest" x="433" y="49" label="浏览" styleName="BigFont"
 			  click="onBrowseClick(event)" enabled="{!isUseSrcPath}"/>
 	<s:CheckBox id="cbUseSrcDir" left="20" top="73" label="使用源路径" styleName="BigFont" change="{isUseSrcPath = !isUseSrcPath}"/>
-	
+
 	<mx:HRule y="104" width="500" horizontalCenter="0"/>
-	
+
 	<s:Label left="20" top="115" styleName="BigFont" text="压缩品质"/>
 	<s:HSlider id="hsQuality" left="98" top="118" width="310" maximum="101" minimum="1"
 			   value="{quality}" change="onQualityChange(event)" />
 	<s:TextInput id="txQuality" left="433" top="111" width="70" text="80" textAlign="center" restrict="0-9"
 				 change="onQualityChange(event)" />
-	
+
 	<s:RadioButton id="rbAction" left="20" top="142" label="动作打包" selected="{type==TYPE_ACTION}"
 				   styleName="BigFont" click="onRadioButtonClick(event)" />
 	<s:BorderContainer top="172" width="490" height="250" borderVisible="true"
 					   dropShadowVisible="true" horizontalCenter="0">
-		<s:DataGrid id="dgAction" x="16" y="12" width="450" height="130" requestedRowCount="4" enabled="{type==TYPE_ACTION}">
+		<s:DataGrid id="dgAction" x="16" y="12" width="450" height="130" requestedRowCount="4" enabled="{type==TYPE_ACTION}"
+						selectionMode="singleRow" rightClick="{dgAction.selectedIndex=-1}">
 			<s:columns>
 				<mx:ArrayList>
-					<s:GridColumn dataField="packOrder" headerText="打包顺序"></s:GridColumn>
-					<s:GridColumn dataField="actionName" headerText="动作名称"></s:GridColumn>
+					<s:GridColumn dataField="index" headerText="打包索引"></s:GridColumn>
+					<s:GridColumn dataField="name" headerText="动作名称"></s:GridColumn>
 					<s:GridColumn dataField="directory" headerText="文件夹"></s:GridColumn>
-					<s:GridColumn dataField="direction" headerText="方向"></s:GridColumn>
 					<s:GridColumn dataField="interval" headerText="帧间隔(毫秒)"></s:GridColumn>
 				</mx:ArrayList>
 			</s:columns>
 			<mx:ArrayList></mx:ArrayList>
 		</s:DataGrid>
-		<s:Label x="51" y="152" styleName="BigFont" text="动作名称"/>
-		<s:Label x="194" y="152" styleName="BigFont" text="文件夹"/>
-		<s:Label x="308" y="152" styleName="BigFont" text="方向"/>
+		<s:Label x="53" y="152" styleName="BigFont" text="动作名称"/>
+		<s:Label x="222" y="152" styleName="BigFont" text="文件夹名"/>
 		<s:Label x="372" y="152" styleName="BigFont" text="帧间隔(毫秒)"/>
-		<s:TextInput id="txActionName" x="16" y="176" enabled="{type==TYPE_ACTION}"/>
-		<s:TextInput id="txActionDirectory" x="157" y="176" enabled="{type==TYPE_ACTION}"/>
-		<s:TextInput id="txActionDirection" x="297" y="176" width="60" enabled="{type==TYPE_ACTION}"/>
-		<s:TextInput id="txActionInterval" x="368" y="176" width="100" enabled="{type==TYPE_ACTION}"/>
-		<s:Button id="pbAddAction" x="124" y="212" label="新增动作" styleName="BigFont" enabled="{type==TYPE_ACTION}" click="addAction()"/>
+		<s:TextInput id="txActionName" x="18" y="176" enabled="{type==TYPE_ACTION}" maxChars="30" />
+		<s:TextInput id="txActionDirectory" x="189" y="176" enabled="{type==TYPE_ACTION}" restrict="^&lt;&gt;&quot;\\/:*?|" maxChars="30" />
+		<s:TextInput id="txActionInterval" x="368" y="176" width="100" enabled="{type==TYPE_ACTION}" restrict="0-9" maxChars="8" />
+		<s:Button id="pbAddAction" x="124" y="212" label="插入动作" styleName="BigFont" enabled="{type==TYPE_ACTION}" click="addAction()"/>
 		<s:Button id="pbRemoveAction" x="286" y="212" label="删除动作" styleName="BigFont" enabled="{type==TYPE_ACTION}" click="removeAction()"/>
 	</s:BorderContainer>
-	
+
 	<s:RadioButton id="rbEffect" left="20" top="432" label="特效打包" styleName="BigFont"
 				   selected="{type==TYPE_EFFECT}" click="onRadioButtonClick(event)"/>
 	<s:BorderContainer top="462" width="490" height="45" dropShadowVisible="true"
@@ -60,40 +58,52 @@
 		<s:Label x="10" y="13" styleName="BigFont" text="帧间隔(毫秒)"/>
 		<s:TextInput id="txEffectInterval" x="108" y="10" enabled="{type==TYPE_EFFECT}"/>
 	</s:BorderContainer>
-	
+
 	<s:Button id="pbPack" top="521" width="100" height="30" label="打包" horizontalCenter="0"
 			  styleName="BigFont" click="startPack()"/>
 	<fx:Script>
 		<![CDATA[
+			import com.worrysprite.utils.FileUtils;
+			import enum.ThreadMessageEnum;
+			import flash.filesystem.File;
+			import flash.net.registerClassAlias;
+			import model.ActionVo;
+			import mx.collections.ArrayList;
 			import mx.controls.Alert;
 			import mx.events.FlexEvent;
-			
 			import spark.events.TextOperationEvent;
-			
+			import events.ThreadEvent;
+			import mx.managers.PopUpManager;
+
 			private static const TYPE_ACTION:int = 1;
 			private static const TYPE_EFFECT:int = 2;
-			
+
 			[Bindable]
 			private var type:int = TYPE_ACTION;
-			
+
 			[Bindable]
 			private var isUseSrcPath:Boolean;
 			[Bindable]
 			private var quality:int = 80;
-			
+
 			private var srcDir:File;
 			private var destDir:File;
-			
+
 			private var popup:ProgressPanel;
-			
+
+			private var actionList:ArrayList;
+
 			private function onCreate(event:FlexEvent):void
 			{
 				srcDir = new File();
 				srcDir.addEventListener(Event.SELECT, onDirSelected);
 				destDir = new File();
 				destDir.addEventListener(Event.SELECT, onDirSelected);
+				actionList = dgAction.dataProvider as ArrayList;
+
+				registerClassAlias("model.ActionVo", ActionVo);
 			}
-			
+
 			private function onDirSelected(e:Event):void
 			{
 				if(e.currentTarget == srcDir)
@@ -105,7 +115,7 @@
 					txDest.text = destDir.nativePath;
 				}
 			}
-			
+
 			private function onRadioButtonClick(event:MouseEvent):void
 			{
 				switch(event.currentTarget)
@@ -113,25 +123,27 @@
 					case rbAction:
 						type = TYPE_ACTION;
 						break;
-					
+
 					case rbEffect:
 						type = TYPE_EFFECT;
 						break;
 				}
 			}
-			
+
 			private function onBrowseClick(event:MouseEvent):void
 			{
 				switch(event.currentTarget)
 				{
 					case pbBrowseSrc:
+						srcDir.browseForDirectory("选择资源目录");
 						break;
-					
+
 					case pbBrowseDest:
+						destDir.browseForDirectory("选择输出目录");
 						break;
 				}
 			}
-			
+
 			private function onQualityChange(event:Event):void
 			{
 				switch (event.currentTarget)
@@ -148,7 +160,7 @@
 						}
 						quality = value;
 						break;
-					
+
 					case hsQuality:
 						quality = hsQuality.value;
 						break;
@@ -162,55 +174,119 @@
 					txQuality.text = quality.toString();
 				}
 			}
-			
-			private function checkDir(dir:File, path:String, tip:String):Boolean
-			{
-				try
-				{
-					dir.nativePath = path;
-					if (!dir.exists || !dir.isDirectory)
-					{
-						dir.url = path;
-					}
-					if (!dir.exists || !dir.isDirectory)
-					{
-						Alert.show(tip, "错误");
-						return false;
-					}
-				}
-				catch (err:Error)
-				{
-					Alert.show(tip, "错误");
-					return false;
-				}
-				return true;
-			}
-			
+
 			private function addAction():void
 			{
-				if (!checkDir(srcDir, txSrc.text, "请先指定有效的资源路径"))
+				if (!FileUtils.checkDirValid(txSrc.text, srcDir))
 				{
+					Alert.show("请先指定有效的资源路径", "错误");
 					return;
 				}
-				var actionDir:File = srcDir.resolvePath(txActionDirectory.text);
-				if (actionDir.exists && actionDir.isDirectory)
+
+				var name:String = txActionName.text;
+				var dir:String = txActionDirectory.text;
+				var interval:int = int(txActionInterval.text);
+				if (!name || !dir || interval <= 0)
 				{
-					
+					Alert.show("请输入完整的动作内容", "错误");
+					return;
+				}
+				var actionDir:File = srcDir.resolvePath(dir);
+				if (!actionDir.exists || !actionDir.isDirectory)
+				{
+					Alert.show("无效的文件夹名，请确定资源路径里有" + dir + "文件夹", "错误");
+					return;
+				}
+
+				var vo:ActionVo = new ActionVo();
+				vo.name = name;
+				vo.directory = dir;
+				vo.interval = interval;
+
+				if (dgAction.selectedIndex >= 0)
+				{
+					vo.index = dgAction.selectedIndex;
+					actionList.addItemAt(vo, vo.index);
+					for (var i:int = vo.index + 1; i < actionList.length; ++i)
+					{
+						actionList.getItemAt(i).index = i;
+					}
 				}
 				else
 				{
-					Alert.show("", "错误");
+					vo.index = actionList.length;
+					actionList.addItem(vo);
+				}
+			}
+
+			private function removeAction():void
+			{
+				var selectedIndex:int = dgAction.selectedIndex;
+				if (selectedIndex == -1)
+				{
+					Alert.show("请选择一个动作", "错误");
+					return;
+				}
+				actionList.removeItemAt(selectedIndex);
+				for (var i:int = selectedIndex; i < actionList.length; ++i)
+				{
+					actionList.getItemAt(i).index = i;
+				}
+			}
+
+			private function startPack():void
+			{
+				if (!FileUtils.checkDirValid(txSrc.text, srcDir))
+				{
+					Alert.show("无效的资源路径", "错误");
+					return;
+				}
+				if (isUseSrcPath)
+				{
+					destDir.url = srcDir.url;
+				}
+				else
+				{
+					if (!FileUtils.checkDirValid(txDest.text, destDir))
+					{
+						Alert.show("无效的输出路径", "错误");
+						return;
+					}
+				}
+				if (type == TYPE_ACTION)
+				{
+					if (actionList.length == 0)
+					{
+						Alert.show("请先添加动作", "错误");
+					}
+					else
+					{
+						WorkerManager.listener.addEventListener(ThreadEvent.THREAD_STATE, onState);
+						WorkerManager.sendMessage([ThreadMessageEnum.COMMAND_PACK_ACTION, srcDir.url, destDir.url, hsQuality.value, actionList.source.slice()]);
+					}
+				}
+				else if (type == TYPE_EFFECT)
+				{
+					WorkerManager.listener.addEventListener(ThreadEvent.THREAD_STATE, onState);
+					WorkerManager.sendMessage([ThreadMessageEnum.COMMAND_PACK_EFFECT, srcDir.url, destDir.url, hsQuality.value, int(txEffectInterval.text)]);
 				}
 			}
 			
-			private function removeAction():void
+			private function onState(e:ThreadEvent):void
 			{
-				
-			}
-			
-			private function startPack():void
-			{
-				
+				var msg:Array = e.msg;
+				switch(msg[0])
+				{
+					case ThreadMessageEnum.STATE_PROGRESS:
+						popup.setProgressInfo(msg[1], msg[2], msg[3]);
+						break;
+						
+					case ThreadMessageEnum.STATE_COMPLETE:
+						PopUpManager.removePopUp(popup);
+						popup = null;
+						WorkerManager.listener.removeEventListener(ThreadEvent.THREAD_STATE, onState);
+						break;
+				}
 			}
 		]]>
 	</fx:Script>

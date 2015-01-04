@@ -26,7 +26,6 @@ package controller
 		public static function compress(srcDirURL:String, destDirURL:String, quality:int, isSingleFile:Boolean):void
 		{
 			var srcDir:File = new File(srcDirURL);
-			var destDir:File = new File(destDirURL);
 			numLoaded = 0;
 			var srcFiles:Array = srcDir.getDirectoryListing();
 			var file:File;
@@ -43,7 +42,7 @@ package controller
 			if (srcFileList.length > 0)
 			{
 				_quality = quality;
-				outputDir = destDir;
+				outputDir = new File(destDirURL);
 				if (isSingleFile)
 				{
 					outputStream = new FileStream();

@@ -22,7 +22,7 @@ package enum
 		 * String	调试信息内容
 		 */
 		public static const STATE_TRACE:int = 3;
-		
+
 		/**
 		 * 压缩PNG消息，含有4个参数：
 		 * String	源文件夹url
@@ -40,6 +40,22 @@ package enum
 		 * int	品质
 		 */
 		public static const COMMAND_CUT_MAP:int = 102;
+		/**
+		 * 打包动作，含有4个参数
+		 * String	源文件夹url
+		 * String	目标文件夹url
+		 * int	品质
+		 * Array	动作数组（ActionVo对象数组）
+		 */
+		public static const COMMAND_PACK_ACTION:int = 103;
+		/**
+		 * 打包特效，含有4个参数
+		 * String	源文件夹url
+		 * String	目标文件夹url
+		 * int	品质
+		 * int	帧间隔（毫秒）
+		 */
+		public static const COMMAND_PACK_EFFECT:int = 104;
 	}
 
 }
