@@ -36,7 +36,7 @@ package controller
 				if (!file.isDirectory && file.extension == "png")
 				{
 					srcFileList.push(file);
-					loader.loadNow(file.url, onLoaded);
+					loader.queueLoad(file.url, onLoaded);
 				}
 			}
 			if (srcFileList.length > 0)

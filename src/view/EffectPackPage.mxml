@@ -65,15 +65,16 @@
 		<![CDATA[
 			import com.worrysprite.utils.FileUtils;
 			import enum.ThreadMessageEnum;
+			import events.ThreadEvent;
+			import flash.display.BitmapData;
 			import flash.filesystem.File;
 			import flash.net.registerClassAlias;
 			import model.ActionVo;
 			import mx.collections.ArrayList;
 			import mx.controls.Alert;
 			import mx.events.FlexEvent;
-			import spark.events.TextOperationEvent;
-			import events.ThreadEvent;
 			import mx.managers.PopUpManager;
+			import spark.events.TextOperationEvent;
 
 			private static const TYPE_ACTION:int = 1;
 			private static const TYPE_EFFECT:int = 2;
@@ -102,6 +103,7 @@
 				actionList = dgAction.dataProvider as ArrayList;
 
 				registerClassAlias("model.ActionVo", ActionVo);
+				registerClassAlias("flash.display.BitmapData", BitmapData);
 			}
 
 			private function onDirSelected(e:Event):void

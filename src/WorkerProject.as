@@ -4,6 +4,7 @@ package
 	import controller.CutBitmapController;
 	import controller.EffectPackController;
 	import enum.ThreadMessageEnum;
+	import flash.display.BitmapData;
 	import flash.display.Sprite;
 	import flash.events.Event;
 	import flash.net.registerClassAlias;
@@ -31,6 +32,7 @@ package
 			commandChannel.addEventListener(Event.CHANNEL_MESSAGE, onCommand);
 			stateChannel = Worker.current.getSharedProperty("StateChannel") as MessageChannel;
 			registerClassAlias("model.ActionVo", ActionVo);
+			registerClassAlias("flash.display.BitmapData", BitmapData);
 		}
 		
 		private function onCommand(e:Event):void

@@ -1,5 +1,6 @@
 package controller
 {
+	import flash.display.BitmapData;
 	import flash.filesystem.File;
 	import flash.filesystem.FileStream;
 	import model.ActionVo;
@@ -20,8 +21,16 @@ package controller
 			for (var i:int = 0; i < actionList.length; ++i)
 			{
 				action = actionList[i];
-				WorkerProject.trace("index=" + action.index + ", name=" + action.name + ", dir=" + action.directory + ", interval=" + action.interval);
+				action.bitmaps = new Vector.<BitmapData>();
+				WorkerProject.trace("index=" + action.index + ", dir=" + action.directory + ", interval=" + action.interval);
+				processFiles(srcDir.resolvePath(action.directory).getDirectoryListing());
+				
 			}
+		}
+		
+		private static function processFiles(files:Array):void
+		{
+			
 		}
 		
 		public static function packEffect(srcDirURL:String, destDirURL:String, quality:int, interval:int):void

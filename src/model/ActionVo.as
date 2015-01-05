@@ -1,5 +1,6 @@
 package model
 {
+	import flash.display.BitmapData;
 	/**
 	 * 动作VO
 	 * @author WorrySprite
@@ -11,17 +12,17 @@ package model
 		 */
 		public var index:int;
 		/**
-		 * 动作名称
-		 */
-		public var name:String;
-		/**
 		 * 资源路径
 		 */
 		public var directory:String;
 		/**
 		 * 帧间隔(毫秒)
 		 */
-		public var interval:int;
+		public var interval:uint;
+		/**
+		 * 相关图片
+		 */
+		public var bitmaps:Vector.<BitmapData>;
 		
 		public function ActionVo()
 		{
