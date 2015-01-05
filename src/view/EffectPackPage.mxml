@@ -34,7 +34,6 @@
 			<s:columns>
 				<mx:ArrayList>
 					<s:GridColumn dataField="index" headerText="打包索引"></s:GridColumn>
-					<s:GridColumn dataField="name" headerText="动作名称"></s:GridColumn>
 					<s:GridColumn dataField="directory" headerText="文件夹"></s:GridColumn>
 					<s:GridColumn dataField="interval" headerText="帧间隔(毫秒)"></s:GridColumn>
 				</mx:ArrayList>
@@ -65,15 +64,16 @@
 		<![CDATA[
 			import com.worrysprite.utils.FileUtils;
 			import enum.ThreadMessageEnum;
+			import events.ThreadEvent;
+			import flash.display.BitmapData;
 			import flash.filesystem.File;
 			import flash.net.registerClassAlias;
 			import model.ActionVo;
 			import mx.collections.ArrayList;
 			import mx.controls.Alert;
 			import mx.events.FlexEvent;
-			import spark.events.TextOperationEvent;
-			import events.ThreadEvent;
 			import mx.managers.PopUpManager;
+			import spark.events.TextOperationEvent;
 
 			private static const TYPE_ACTION:int = 1;
 			private static const TYPE_EFFECT:int = 2;
@@ -102,6 +102,7 @@
 				actionList = dgAction.dataProvider as ArrayList;
 
 				registerClassAlias("model.ActionVo", ActionVo);
+				registerClassAlias("flash.display.BitmapData", BitmapData);
 			}
 
 			private function onDirSelected(e:Event):void
@@ -199,7 +200,6 @@
 				}
 
 				var vo:ActionVo = new ActionVo();
-				vo.name = name;
 				vo.directory = dir;
 				vo.interval = interval;
 

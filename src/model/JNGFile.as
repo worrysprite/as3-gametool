@@ -17,7 +17,8 @@ package model
 	 */
 	public class JNGFile extends EventDispatcher
 	{
-		private static const CURRENT_VERSION:uint = 0x00010000;	//v1.0
+		private static const VERSION_1_0:uint = 0x00010000;	//v1.0
+		
 		private var jpgEncoder:JPEGEncoder;
 		private var _bitmaps:Vector.<BitmapData>;
 		private var _bytes:ByteArray;
@@ -29,8 +30,45 @@ package model
 			_bitmaps = new Vector.<BitmapData>();
 			_bytes = new ByteArray();
 			_bytes.endian = Endian.LITTLE_ENDIAN;
-			_bytes.writeUnsignedInt(CURRENT_VERSION);
-			_bytes.writeShort(0);
+			_bytes.writeUnsignedInt(VERSION_1_0);	//写入版本
+			_bytes.writeShort(0);	//写入图片数
+		}
+		
+		private function readV1_0():void
+		{
+			_bitmaps.length = 0;
+			_bitmaps.length = _bytes.readUnsignedShort();
+			trace("jng version:", VERSION_1_0, "bitmap count:", _bitmaps.length);
+			var width:uint;
+			var height:uint;
+			var length:uint;
+			var jpgBytes:ByteArray = new ByteArray();
+			var bmp:BitmapData;
+			var loader:SwfLoaderManager = SwfLoaderManager.getInstance();
+			fileLoaded = 0;
+			for (var i:int = 0; i < _bitmaps.length; ++i)
+			{
+				//读取宽高
+				width = _bytes.readUnsignedShort();
+				height = _bytes.readUnsignedShort();
+				bmp = new BitmapData(width, height);
+				_bitmaps[i] = bmp;
+				
+				//读取jpg
+				length = _bytes.readUnsignedInt();
+				jpgBytes.clear();
+				_bytes.readBytes(jpgBytes, 0, length);
+				loader.loadBytes(jpgBytes, onLoaded, [i]);
+				
+				//读取alpha
+				for (var j:int = 0; j < height; ++j)
+				{
+					for (var k:int = 0; k < width; ++k)
+					{
+						bmp.setPixel32(k, j, _bytes.readByte() << 24);
+					}
+				}
+			}
 		}
 		
 		private function onLoaded(jpgImg:Bitmap, index:int):void
@@ -85,38 +123,9 @@ package model
 			_bytes.writeBytes(file);
 			_bytes.position = 0;
 			var version:uint = _bytes.readUnsignedInt();
-			_bitmaps.length = 0;
-			_bitmaps.length = _bytes.readUnsignedShort();
-			trace("jng version:", version, "bitmap count:", _bitmaps.length);
-			var width:uint;
-			var height:uint;
-			var length:uint;
-			var jpgBytes:ByteArray = new ByteArray();
-			var bmp:BitmapData;
-			var loader:SwfLoaderManager = SwfLoaderManager.getInstance();
-			fileLoaded = 0;
-			for (var i:int = 0; i < _bitmaps.length; ++i)
+			if (version == VERSION_1_0)
 			{
-				//读取宽高
-				width = _bytes.readUnsignedShort();
-				height = _bytes.readUnsignedShort();
-				bmp = new BitmapData(width, height);
-				_bitmaps[i] = bmp;
-				
-				//读取jpg
-				length = _bytes.readUnsignedInt();
-				jpgBytes.clear();
-				_bytes.readBytes(jpgBytes, 0, length);
-				loader.loadBytes(jpgBytes, onLoaded, [i]);
-				
-				//读取alpha
-				for (var j:int = 0; j < height; ++j)
-				{
-					for (var k:int = 0; k < width; ++k)
-					{
-						bmp.setPixel32(k, j, _bytes.readByte() << 24);
-					}
-				}
+				readV1_0();
 			}
 		}
 		
