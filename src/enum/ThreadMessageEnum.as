@@ -22,6 +22,11 @@ package enum
 		 * String	调试信息内容
 		 */
 		public static const STATE_TRACE:int = 3;
+		/**
+		 * 错误信息，含有1个参数：
+		 * int	错误ID
+		 */
+		public static const STATE_ERROR:int = 4;
 
 		/**
 		 * 压缩PNG消息，含有4个参数：

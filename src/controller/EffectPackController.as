@@ -78,11 +78,14 @@ package controller
 				file = fileList[i];
 				if (!file.isDirectory)
 				{
-					ext = file.extension.toLowerCase();
-					if (ext == "png" || ext == "jpg")
+					if (file.extension)
 					{
-						srcFileList.push(file);
-						loader.queueLoad(file.url, onLoaded, [action, isEffect]);
+						ext = file.extension.toLowerCase();
+						if (ext == "png" || ext == "jpg")
+						{
+							srcFileList.push(file);
+							loader.queueLoad(file.url, onLoaded, [action, isEffect]);
+						}
 					}
 				}
 			}
@@ -146,7 +149,14 @@ package controller
 			{
 				//WorkerProject.trace("write to file, " + destFile.nativePath);
 				var stream:FileStream = new FileStream();
-				stream.open(destFile, FileMode.WRITE);
+				try
+				{
+					stream.open(destFile, FileMode.WRITE);
+				}
+				catch (e:Error)
+				{
+					WorkerProject.sendMessage([ThreadMessageEnum.STATE_ERROR, e.errorID]);
+				}
 				outputFile.writeToFile(stream);
 				stream.close();
 			}
@@ -156,6 +166,7 @@ package controller
 			actionList = null;
 			processActionIndex = 0;
 			numLoaded = 0;
+			//WorkerProject.trace("complete!");
 			WorkerProject.sendMessage([ThreadMessageEnum.STATE_COMPLETE]);
 		}
 		
