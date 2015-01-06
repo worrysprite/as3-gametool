@@ -21,7 +21,7 @@ package model
 		
 		private var _type:int;
 		private var _bytes:ByteArray;
-		private var actionList:Vector.<ActionVo>;
+		private var _actionList:Vector.<ActionVo>;
 		private var _quality:int;
 		private var jngList:Vector.<JNGFile>;
 		
@@ -33,7 +33,7 @@ package model
 			_bytes.writeUnsignedInt(VERSION_1_0);	//写入版本
 			_bytes.writeShort(0);	//写入动作数量
 			
-			actionList = new Vector.<ActionVo>();
+			_actionList = new Vector.<ActionVo>();
 			_quality = quality;
 			if (quality <= 100)
 			{
@@ -66,27 +66,33 @@ package model
 			{
 				return;
 			}
-			action.index = actionList.length;
+			action.index = _actionList.length;
 			//修改动作数量
 			_bytes.position = 4;
-			_bytes.writeShort(actionList.push(action));
+			_bytes.writeShort(_actionList.push(action));
 			_bytes.position = _bytes.length;
 			
 			//写入动作信息
 			_bytes.writeUTF(action.directory);
 			_bytes.writeUnsignedInt(action.interval);
+			//写入PNG图片数量
+			var bmpCount:int = action.bitmaps.length;
+			_bytes.writeShort(bmpCount);
 			
 			var jng:JNGFile;
-			if (jngList)
+			if (_quality <= 100)	//压缩为jng
 			{
 				jng = new JNGFile(_quality);	//每个动作对应一个jng文件
 				jngList.push(jng);
 			}
-			else
+			//写入偏移量列表
+			for (var j:int = 0; j < bmpCount; ++j)
 			{
-				_bytes.writeShort(action.bitmaps.length);	//写入PNG图片数量
+				_bytes.writeShort(action.offsetXs[j]);
+				_bytes.writeShort(action.offsetYs[j]);
 			}
-			for (var i:int = 0; i < action.bitmaps.length; ++i)
+			//写入图片列表
+			for (var i:int = 0; i < bmpCount; ++i)
 			{
 				if (jng)
 				{
@@ -134,6 +140,19 @@ package model
 		public function get type():int
 		{
 			return _type;
+		}
+		
+		public function get actionList():Vector.<ActionVo>
+		{
+			return _actionList;
+		}
+		
+		/**
+		 * 品质，1~100为jpg品质，101为无损
+		 */
+		public function get quality():int
+		{
+			return _quality;
 		}
 	}
 }

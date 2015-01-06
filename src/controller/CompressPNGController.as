@@ -16,16 +16,19 @@ package controller
 	public class CompressPNGController
 	{
 		private static var srcFileList:Vector.<File> = new Vector.<File>();
-		private static var numLoaded:int;
 		private static var outputDir:File;
-		private static var outputStream:FileStream;
+		private static var single:Boolean;
+		private static var numLoaded:int;
 		private static var outputFile:JNGFile;
 		private static var _quality:int;
-		private static var _processingFilePath:String;
 		
 		public static function compress(srcDirURL:String, destDirURL:String, quality:int, isSingleFile:Boolean):void
 		{
 			var srcDir:File = new File(srcDirURL);
+			outputDir = new File(destDirURL);
+			_quality = quality;
+			single = isSingleFile;
+			
 			numLoaded = 0;
 			var srcFiles:Array = srcDir.getDirectoryListing();
 			var file:File;
@@ -39,19 +42,9 @@ package controller
 					loader.queueLoad(file.url, onLoaded);
 				}
 			}
-			if (srcFileList.length > 0)
+			if (srcFileList.length <= 0)	//如果未加载任何文件
 			{
-				_quality = quality;
-				outputDir = new File(destDirURL);
-				if (isSingleFile)
-				{
-					outputStream = new FileStream();
-					outputStream.endian = Endian.LITTLE_ENDIAN;
-					outputStream.open(outputDir.resolvePath("output.jng"), FileMode.WRITE);
-				}
-			}
-			else
-			{
+				outputDir = null;
 				WorkerProject.sendMessage([ThreadMessageEnum.STATE_COMPLETE]);
 			}
 		}
@@ -69,32 +62,34 @@ package controller
 				outputFile = new JNGFile(_quality);
 			}
 			outputFile.addBitmap(Bitmap(data).bitmapData);
-			if (!outputStream)
+			
+			var stream:FileStream;
+			if (!single)	//不合并单个文件就直接写入文件
 			{
 				//创建新文件
 				var fileName:String = srcFile.name.substring(0, srcFile.name.length - 3) + "jng";
-				var file:File = outputDir.resolvePath(fileName);
-				//写入文件内容
-				var stream:FileStream = new FileStream();
-				stream.endian = Endian.LITTLE_ENDIAN;
-				stream.open(file, FileMode.WRITE);
-				outputFile.writeToFile(stream);
-				stream.close();
-				outputFile = null;
+				writeFile(fileName);
 			}
 			//全部完毕
 			if (numLoaded == srcFileList.length)
 			{
-				if (outputStream)
+				if (single)
 				{
-					outputFile.writeToFile(outputStream);
-					outputStream.close();
-					outputFile = null;
+					writeFile("output.jng");
 				}
 				srcFileList.length = 0;
-				_processingFilePath = null;
 				WorkerProject.sendMessage([ThreadMessageEnum.STATE_COMPLETE]);
 			}
+		}
+		
+		private static function writeFile(fileName:String):void
+		{
+			var stream:FileStream = new FileStream();
+			stream.endian = Endian.LITTLE_ENDIAN;
+			stream.open(outputDir.resolvePath(fileName), FileMode.WRITE);
+			outputFile.writeToFile(stream);
+			stream.close();
+			outputFile = null;
 		}
 	}
 }

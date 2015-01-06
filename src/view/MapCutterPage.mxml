@@ -134,7 +134,7 @@
 				}
 				if (isUseSrcPath)
 				{
-					destDir.url = srcImageFile.resolvePath("..").url
+					destDir.url = srcImageFile.resolvePath("..").url;
 				}
 				else
 				{

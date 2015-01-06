@@ -40,14 +40,14 @@
 			</s:columns>
 			<mx:ArrayList></mx:ArrayList>
 		</s:DataGrid>
-		<s:Label x="53" y="152" styleName="BigFont" text="动作名称"/>
-		<s:Label x="222" y="152" styleName="BigFont" text="文件夹名"/>
-		<s:Label x="372" y="152" styleName="BigFont" text="帧间隔(毫秒)"/>
-		<s:TextInput id="txActionName" x="18" y="176" enabled="{type==TYPE_ACTION}" maxChars="30" />
-		<s:TextInput id="txActionDirectory" x="189" y="176" enabled="{type==TYPE_ACTION}" restrict="^&lt;&gt;&quot;\\/:*?|" maxChars="30" />
-		<s:TextInput id="txActionInterval" x="368" y="176" width="100" enabled="{type==TYPE_ACTION}" restrict="0-9" maxChars="8" />
-		<s:Button id="pbAddAction" x="124" y="212" label="插入动作" styleName="BigFont" enabled="{type==TYPE_ACTION}" click="addAction()"/>
-		<s:Button id="pbRemoveAction" x="286" y="212" label="删除动作" styleName="BigFont" enabled="{type==TYPE_ACTION}" click="removeAction()"/>
+		<s:Label x="20" y="152" styleName="BigFont" text="动作文件夹名"/>
+		<s:Label x="20" y="182" styleName="BigFont" text="帧间隔(毫秒)"/>
+		<s:TextInput id="txActionDirectory" x="130" y="149" width="160" enabled="{type==TYPE_ACTION}"
+					 maxChars="30" restrict="^&lt;&gt;&quot;\\/:*?|"/>
+		<s:Button id="pbBrowseAction" x="306" y="150" label="浏览" styleName="BigFont" enabled="{type==TYPE_ACTION}" click="onBrowseClick(event)" />
+		<s:TextInput id="txActionInterval" x="130" y="180" width="100" enabled="{type==TYPE_ACTION}" restrict="0-9" maxChars="8" />
+		<s:Button id="pbAddAction" x="104" y="212" label="插入动作" styleName="BigFont" enabled="{type==TYPE_ACTION}" click="addAction()"/>
+		<s:Button id="pbRemoveAction" x="306" y="212" label="删除动作" styleName="BigFont" enabled="{type==TYPE_ACTION}" click="removeAction()"/>
 	</s:BorderContainer>
 
 	<s:RadioButton id="rbEffect" left="20" top="432" label="特效打包" styleName="BigFont"
@@ -66,7 +66,9 @@
 			import enum.ThreadMessageEnum;
 			import events.ThreadEvent;
 			import flash.display.BitmapData;
+			import flash.events.Event;
 			import flash.filesystem.File;
+			import flash.net.FileFilter;
 			import flash.net.registerClassAlias;
 			import model.ActionVo;
 			import mx.collections.ArrayList;
@@ -87,7 +89,8 @@
 			private var quality:int = 80;
 
 			private var srcDir:File;
-			private var destDir:File;
+			private var destFile:File;
+			private var actionDir:File;
 
 			private var popup:ProgressPanel;
 
@@ -96,24 +99,35 @@
 			private function onCreate(event:FlexEvent):void
 			{
 				srcDir = new File();
-				srcDir.addEventListener(Event.SELECT, onDirSelected);
-				destDir = new File();
-				destDir.addEventListener(Event.SELECT, onDirSelected);
+				srcDir.addEventListener(Event.SELECT, onFileSelected);
+				destFile = new File();
+				destFile.addEventListener(Event.SELECT, onFileSelected);
+				actionDir = new File();
+				actionDir.addEventListener(Event.SELECT, onFileSelected);
+				
 				actionList = dgAction.dataProvider as ArrayList;
 
 				registerClassAlias("model.ActionVo", ActionVo);
 				registerClassAlias("flash.display.BitmapData", BitmapData);
 			}
 
-			private function onDirSelected(e:Event):void
+			private function onFileSelected(e:Event):void
 			{
 				if(e.currentTarget == srcDir)
 				{
 					txSrc.text = srcDir.nativePath;
 				}
-				else if(e.currentTarget == destDir)
+				else if(e.currentTarget == destFile)
 				{
-					txDest.text = destDir.nativePath;
+					if (!destFile.extension || destFile.extension != "aep")
+					{
+						destFile.url += ".aep";
+					}
+					txDest.text = destFile.nativePath;
+				}
+				else if (e.currentTarget == actionDir)
+				{
+					txActionDirectory.text = actionDir.name;
 				}
 			}
 
@@ -138,9 +152,13 @@
 					case pbBrowseSrc:
 						srcDir.browseForDirectory("选择资源目录");
 						break;
-
+						
 					case pbBrowseDest:
-						destDir.browseForDirectory("选择输出目录");
+						destFile.browseForSave("保存文件");
+						break;
+						
+					case pbBrowseAction:
+						actionDir.browseForDirectory("选择动作目录");
 						break;
 				}
 			}
@@ -183,19 +201,23 @@
 					Alert.show("请先指定有效的资源路径", "错误");
 					return;
 				}
-
-				var name:String = txActionName.text;
+				
 				var dir:String = txActionDirectory.text;
 				var interval:int = int(txActionInterval.text);
-				if (!name || !dir || interval <= 0)
+				if (!dir || interval <= 0)
 				{
 					Alert.show("请输入完整的动作内容", "错误");
+					return;
+				}
+				if (dir == "." || dir == "..")
+				{
+					Alert.show("无效的文件夹名", "错误");
 					return;
 				}
 				var actionDir:File = srcDir.resolvePath(dir);
 				if (!actionDir.exists || !actionDir.isDirectory)
 				{
-					Alert.show("无效的文件夹名，请确定资源路径里有" + dir + "文件夹", "错误");
+					Alert.show("请确定资源路径里有" + dir + "文件夹", "错误");
 					return;
 				}
 
@@ -243,11 +265,11 @@
 				}
 				if (isUseSrcPath)
 				{
-					destDir.url = srcDir.url;
+					destFile.url = srcDir.resolvePath("output.aep").url;
 				}
 				else
 				{
-					if (!FileUtils.checkDirValid(txDest.text, destDir))
+					if (!FileUtils.checkDirValid(txDest.text, destFile))
 					{
 						Alert.show("无效的输出路径", "错误");
 						return;
@@ -261,14 +283,18 @@
 					}
 					else
 					{
+						popup = PopUpManager.createPopUp(this, ProgressPanel, true) as ProgressPanel;
+						PopUpManager.centerPopUp(popup);
 						WorkerManager.listener.addEventListener(ThreadEvent.THREAD_STATE, onState);
-						WorkerManager.sendMessage([ThreadMessageEnum.COMMAND_PACK_ACTION, srcDir.url, destDir.url, hsQuality.value, actionList.source.slice()]);
+						WorkerManager.sendMessage([ThreadMessageEnum.COMMAND_PACK_ACTION, srcDir.url, destFile.url, hsQuality.value, actionList.source.slice()]);
 					}
 				}
 				else if (type == TYPE_EFFECT)
 				{
+					popup = PopUpManager.createPopUp(this, ProgressPanel, true) as ProgressPanel;
+					PopUpManager.centerPopUp(popup);
 					WorkerManager.listener.addEventListener(ThreadEvent.THREAD_STATE, onState);
-					WorkerManager.sendMessage([ThreadMessageEnum.COMMAND_PACK_EFFECT, srcDir.url, destDir.url, hsQuality.value, int(txEffectInterval.text)]);
+					WorkerManager.sendMessage([ThreadMessageEnum.COMMAND_PACK_EFFECT, srcDir.url, destFile.url, hsQuality.value, int(txEffectInterval.text)]);
 				}
 			}
 			

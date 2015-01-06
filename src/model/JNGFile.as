@@ -19,6 +19,7 @@ package model
 	{
 		private static const VERSION_1_0:uint = 0x00010000;	//v1.0
 		
+		private var version:uint;
 		private var jpgEncoder:JPEGEncoder;
 		private var _bitmaps:Vector.<BitmapData>;
 		private var _bytes:ByteArray;
@@ -26,19 +27,18 @@ package model
 		
 		public function JNGFile(quality:int = 80)
 		{
+			version = VERSION_1_0;
 			jpgEncoder = new JPEGEncoder(quality);
 			_bitmaps = new Vector.<BitmapData>();
 			_bytes = new ByteArray();
 			_bytes.endian = Endian.LITTLE_ENDIAN;
-			_bytes.writeUnsignedInt(VERSION_1_0);	//写入版本
+			_bytes.writeUnsignedInt(version);	//写入版本
 			_bytes.writeShort(0);	//写入图片数
 		}
 		
 		private function readV1_0():void
 		{
-			_bitmaps.length = 0;
 			_bitmaps.length = _bytes.readUnsignedShort();
-			trace("jng version:", VERSION_1_0, "bitmap count:", _bitmaps.length);
 			var width:uint;
 			var height:uint;
 			var length:uint;
@@ -119,10 +119,17 @@ package model
 		public function readFromFile(file:ByteArray):void
 		{
 			file.uncompress();
+			readFromBytes(file);
+		}
+		
+		public function readFromBytes(byteArray:ByteArray):void
+		{
 			_bytes.clear();
-			_bytes.writeBytes(file);
+			_bytes.writeBytes(byteArray);
 			_bytes.position = 0;
-			var version:uint = _bytes.readUnsignedInt();
+			version = _bytes.readUnsignedInt();
+			trace("jng version:", version);
+			_bitmaps.length = 0;
 			if (version == VERSION_1_0)
 			{
 				readV1_0();
