@@ -2,36 +2,86 @@
 <s:WindowedApplication xmlns:fx="http://ns.adobe.com/mxml/2009"
 					   xmlns:s="library://ns.adobe.com/flex/spark"
 					   xmlns:mx="library://ns.adobe.com/flex/mx"
-					   width="530" height="600" backgroundColor="#E6E6E6" xmlns:view="view.*"
+					   width="600" height="600" backgroundColor="#E6E6E6" xmlns:view="view.*"
 					   creationComplete="init()">
 	<fx:Style source="FontStyle.css"/>
-	<fx:Declarations>
-		<s:RadioButtonGroup id="radiogroup1"/>
-		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
-	</fx:Declarations>
-	<s:TabBar id="mainTab" left="0" top="0" dataProvider="{pages}" selectedIndex="0" styleName="BigFont"/>
+	<s:TabBar id="mainTab" left="0" right="0" top="0" height="24" dataProvider="{pages}"
+			  selectedIndex="0" styleName="BigFont"/>
 	<mx:ViewStack id="pages" left="0" right="0" top="24" bottom="0" borderStyle="none"
-				  borderVisible="true" cornerRadius="0" dropShadowVisible="false">
+				  borderVisible="true" cornerRadius="0" dropShadowVisible="false" change="onTabChange(event)">
 		<view:EffectPackPage />
 		<view:MapCutterPage />
 		<view:CompressPNGPage />
 		<view:BitmapScalePage />
-		<view:EffectPreviewPage />
+		<view:EffectPreviewPage id="previewPage" />
+		<view:AboutPage />
 	</mx:ViewStack>
 	<fx:Script>
 		<![CDATA[
 			import com.worrysprite.manager.HeartbeatManager;
+			import com.worrysprite.manager.StageManager;
+			import enum.ErrorCodeEnum;
+			import enum.ThreadMessageEnum;
+			import events.ThreadEvent;
+			import flash.events.Event;
+			import flash.filesystem.FileStream;
+			import mx.controls.Alert;
+			import mx.managers.PopUpManager;
+			import view.ProgressPanel;
+			
+			private var popup:ProgressPanel;
 			
 			private function init():void
 			{
 				WorkerManager.init();
+				WorkerManager.listener.addEventListener(ThreadEvent.THREAD_STATE, onThreadState);
+				popup = new ProgressPanel();
+				
+				
 				addEventListener(Event.ADDED_TO_STAGE, onAdded);
 			}
 			
 			private function onAdded(e:Event):void
 			{
 				removeEventListener(Event.ADDED_TO_STAGE, onAdded);
-				HeartbeatManager.init(stage);
+				StageManager.init(stage);
+			}
+			
+			private function onTabChange(event:Event):void
+			{
+				if (pages.selectedChild == previewPage)
+				{
+					stage.frameRate = 100;
+				}
+				else
+				{
+					stage.frameRate = 10;
+				}
+			}
+			
+			private function onThreadState(e:ThreadEvent):void
+			{
+				var msg:Array = e.msg;
+				switch(msg[0])
+				{
+					case ThreadMessageEnum.STATE_START:
+						PopUpManager.addPopUp(popup, this);
+						PopUpManager.centerPopUp(popup);
+						break;
+					
+					case ThreadMessageEnum.STATE_PROGRESS:
+						popup.setProgressInfo(msg[1], msg[2], msg[3]);
+						break;
+						
+					case ThreadMessageEnum.STATE_ERROR:
+						PopUpManager.removePopUp(popup);
+						Alert.show(ErrorCodeEnum.getErrorMsg(msg[1]), "错误");
+						break;
+						
+					case ThreadMessageEnum.STATE_COMPLETE:
+						PopUpManager.removePopUp(popup);
+						break;
+				}
 			}
 		]]>
 	</fx:Script>

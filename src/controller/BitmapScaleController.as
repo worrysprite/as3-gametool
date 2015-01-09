@@ -1,35 +1,47 @@
 package controller
 {
 	import com.worrysprite.manager.SwfLoaderManager;
-	import com.worrysprite.model.image.JNGFile;
 	import com.worrysprite.utils.FileUtils;
 	import enum.ErrorCodeEnum;
 	import enum.ThreadMessageEnum;
 	import flash.display.Bitmap;
+	import flash.display.BitmapData;
 	import flash.display.DisplayObject;
 	import flash.filesystem.File;
 	import flash.filesystem.FileMode;
 	import flash.filesystem.FileStream;
-	import flash.utils.Endian;
+	import flash.geom.Matrix;
+	import mx.graphics.codec.IImageEncoder;
+	import mx.graphics.codec.JPEGEncoder;
+	import mx.graphics.codec.PNGEncoder;
 	/**
-	 * 压缩PNG
+	 * 图片缩放
 	 * @author WorrySprite
 	 */
-	public class CompressPNGController
+	public class BitmapScaleController
 	{
 		private static var srcFileList:Vector.<File> = new Vector.<File>();
 		private static var outputDir:File;
-		private static var single:Boolean;
+		private static var encoder:IImageEncoder;
+		private static var scaleValue:Number;
+		private static var matrix:Matrix = new Matrix();
 		private static var numLoaded:int;
-		private static var outputFile:JNGFile;
-		private static var _quality:int;
 		
-		public static function compress(srcDirURL:String, destDirURL:String, quality:int, isSingleFile:Boolean):void
+		public static function scale(srcDirURL:String, destDirURL:String, quality:int, percent:int):void
 		{
 			var srcDir:File = new File(srcDirURL);
 			outputDir = new File(destDirURL);
-			_quality = quality;
-			single = isSingleFile;
+			if (quality <= 100)
+			{
+				encoder = new JPEGEncoder(quality);
+			}
+			else
+			{
+				encoder = new PNGEncoder();
+			}
+			matrix.identity();
+			scaleValue = percent / 100;
+			matrix.scale(scaleValue, scaleValue);
 			
 			numLoaded = 0;
 			var allFiles:Array = srcDir.getDirectoryListing();
@@ -38,7 +50,7 @@ package controller
 			for (var i:int = 0; i < allFiles.length; ++i)
 			{
 				file = allFiles[i];
-				if (FileUtils.isPNG(file))
+				if (FileUtils.isImage(file))
 				{
 					srcFileList.push(file);
 					loader.queueLoad(file.url, onLoaded, [file]);
@@ -71,55 +83,44 @@ package controller
 			WorkerProject.sendMessage([ThreadMessageEnum.STATE_PROGRESS, numLoaded, srcFileList.length, tip]);
 			
 			++numLoaded;
-			if (!outputFile)
+			var srcBmp:BitmapData = Bitmap(data).bitmapData;
+			var destBmp:BitmapData;
+			try
 			{
-				outputFile = new JNGFile(_quality);
+				destBmp = new BitmapData(srcBmp.width * scaleValue, srcBmp.height * scaleValue);
 			}
-			outputFile.addBitmap(Bitmap(data).bitmapData);
-			
-			if (!single)	//不合并单个文件就直接写入文件
+			catch (e:Error)
 			{
-				//创建新文件
-				var fileName:String = srcFile.name.substring(0, srcFile.name.length - 3) + "jng";
-				if (!writeFile(fileName))
-				{
-					return;
-				}
-			}
-			//全部完毕
-			if (numLoaded == srcFileList.length)
-			{
-				if (single)
-				{
-					if (!writeFile("output.jng"))
-					{
-						return;
-					}
-				}
 				cleanup();
-				WorkerProject.sendMessage([ThreadMessageEnum.STATE_COMPLETE]);
+				WorkerProject.sendMessage([ThreadMessageEnum.STATE_ERROR, ErrorCodeEnum.BITMAP_OUT_OF_SIZE]);
+				return;
 			}
-		}
-		
-		private static function writeFile(fileName:String):Boolean
-		{
+			destBmp.draw(srcBmp, matrix, null, null, null, true);
+			
+			var ext:String = encoder is PNGEncoder ? ".png" : ".jpg";
+			//写入文件
+			var fileName:String = FileUtils.splitNameAndExt(srcFile.name)[0] + ext;
 			var stream:FileStream = new FileStream();
-			stream.endian = Endian.LITTLE_ENDIAN;
 			try
 			{
 				stream.open(outputDir.resolvePath(fileName), FileMode.WRITE);
-				outputFile.writeToFile(stream);
+				stream.writeBytes(encoder.encode(destBmp));
 			}
 			catch (e:Error)
 			{
 				stream.close();
 				cleanup();	//出错则中断操作
 				WorkerProject.sendMessage([ThreadMessageEnum.STATE_ERROR, e.errorID]);
-				return false;
+				return;
 			}
 			stream.close();
-			outputFile = null;	//单个文件写入完之后要清空让下次创建新文件
-			return true;
+			
+			//全部完毕
+			if (numLoaded == srcFileList.length)
+			{
+				cleanup();
+				WorkerProject.sendMessage([ThreadMessageEnum.STATE_COMPLETE]);
+			}
 		}
 		
 		private static function cleanup():void
@@ -127,7 +128,8 @@ package controller
 			outputDir = null;
 			srcFileList.length = 0;
 			numLoaded = 0;
-			outputFile = null;
+			encoder = null;
 		}
 	}
+
 }

@@ -27,6 +27,10 @@ package enum
 		 * int	错误ID
 		 */
 		public static const STATE_ERROR:int = 4;
+		/**
+		 * 开始处理
+		 */
+		public static const STATE_START:int = 5;
 
 		/**
 		 * 压缩PNG消息，含有4个参数：
@@ -61,6 +65,14 @@ package enum
 		 * int	帧间隔（毫秒）
 		 */
 		public static const COMMAND_PACK_EFFECT:int = 104;
+		/**
+		 * 缩放图片，含有4个参数
+		 * String	源文件夹url
+		 * String	目标文件夹url
+		 * int	品质
+		 * int	缩放百分比
+		 */
+		public static const COMMAND_SCALE_BITMAP:int = 105;
 	}
 
 }

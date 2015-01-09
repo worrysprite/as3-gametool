@@ -2,32 +2,35 @@
 <s:NavigatorContent xmlns:fx="http://ns.adobe.com/mxml/2009"
 					xmlns:s="library://ns.adobe.com/flex/spark"
 					xmlns:mx="library://ns.adobe.com/flex/mx"
-					width="530" height="576" label="压缩PNG" creationComplete="onCreate(event)">
+					label="压缩PNG" creationComplete="onCreate(event)">
+	<fx:Style source="FontStyle.css"/>
 	<fx:Declarations>
 		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
 	</fx:Declarations>
 	<s:Label left="20" top="18" styleName="BigFont" text="资源路径"/>
-	<s:TextInput id="txSrc" left="98" top="15" width="310"/>
-	<s:Button id="pbBrowseSrc" left="433" top="15" label="浏览" click="onClick(event)"
+	<s:TextInput id="txSrc" left="98" right="100" top="15" styleName="DefaultFont"/>
+	<s:Button id="pbBrowseSrc" right="20" top="15" width="70" label="浏览" click="onClick(event)"
 			  styleName="BigFont"/>
 	
-	<s:Label x="20" y="51" styleName="BigFont" text="输出路径"/>
-	<s:TextInput id="txDest" left="98" top="48" width="310" enabled="{!isUseSrcPath}"/>
-	<s:Button id="pbBrowseDest" x="433" y="49" label="浏览" click="onClick(event)"
+	<s:Label left="20" top="51" styleName="BigFont" text="输出路径"/>
+	<s:TextInput id="txDest" left="98" right="100" top="48" enabled="{!isUseSrcPath}"
+				 styleName="DefaultFont"/>
+	<s:Button id="pbBrowseDest" right="20" top="49" label="浏览" click="onClick(event)"
 			  enabled="{!isUseSrcPath}" styleName="BigFont"/>
-	<s:CheckBox left="20" top="73" label="使用源路径" change="{isUseSrcPath = !isUseSrcPath}"
+	<s:CheckBox left="20" top="76" label="使用源路径" change="{isUseSrcPath = !isUseSrcPath}"
 				styleName="BigFont"/>
 	
-	<mx:HRule y="104" width="500" horizontalCenter="0"/>
+	<mx:HRule left="20" right="20" top="104"/>
 	<s:Label left="20" top="115" styleName="BigFont" text="压缩品质"/>
-	<s:HSlider id="hsQuality" left="98" top="118" width="310" change="{quality=hsQuality.value}"
+	<s:HSlider id="hsQuality" left="98" right="100" top="118" change="{quality=hsQuality.value}"
 			   maximum="100" minimum="1" value="{quality}"/>
-	<s:TextInput id="txQuality" left="433" top="111" width="70" change="txQualityChange(event)"
-				 restrict="0-9" text="{quality.toString()}" textAlign="center"/>
+	<s:TextInput id="txQuality" right="20" top="111" width="70" change="txQualityChange(event)"
+				 restrict="0-9" styleName="DefaultFont" text="{quality.toString()}"
+				 textAlign="center"/>
 	
 	<s:Button id="pbCompress" top="145" width="100" height="30" label="压缩" click="onClick(event)"
 			  horizontalCenter="0" styleName="BigFont"/>
-	<s:CheckBox id="cbSingleFile" left="180" top="73" label="合并为单个文件" styleName="BigFont"/>
+	<s:CheckBox id="cbSingleFile" left="180" top="76" label="合并为单个文件" styleName="BigFont"/>
 	<fx:Script>
 		<![CDATA[
 			import com.worrysprite.utils.FileUtils;
@@ -45,8 +48,6 @@
 			
 			private var srcDir:File;
 			private var destDir:File;
-			
-			private var popup:ProgressPanel;
 			
 			private function onCreate(event:FlexEvent):void
 			{
@@ -120,28 +121,7 @@
 						return;
 					}
 				}
-				popup = PopUpManager.createPopUp(this, ProgressPanel, true) as ProgressPanel;
-				PopUpManager.centerPopUp(popup);
-				
-				WorkerManager.listener.addEventListener(ThreadEvent.THREAD_STATE, onState);
 				WorkerManager.sendMessage([ThreadMessageEnum.COMMAND_COMPRESS_PNG, srcDir.url, destDir.url, hsQuality.value, cbSingleFile.selected]);
-			}
-			
-			private function onState(e:ThreadEvent):void
-			{
-				var msg:Array = e.msg;
-				switch(msg[0])
-				{
-					case ThreadMessageEnum.STATE_PROGRESS:
-						popup.setProgressInfo(msg[1], msg[2], msg[3]);
-						break;
-						
-					case ThreadMessageEnum.STATE_COMPLETE:
-						PopUpManager.removePopUp(popup);
-						popup = null;
-						WorkerManager.listener.removeEventListener(ThreadEvent.THREAD_STATE, onState);
-						break;
-				}
 			}
 		]]>
 	</fx:Script>

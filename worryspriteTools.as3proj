@@ -16,6 +16,7 @@
   <!-- Other classes to be compiled into your SWF -->
   <classpaths>
     <class path="src" />
+    <class path="..\worrysprite\src" />
   </classpaths>
   <!-- Build options -->
   <build>
@@ -53,8 +54,6 @@
   <!-- SWC Libraries -->
   <libraryPaths>
     <element path="C:\Program Files (x86)\FlashDevelop\Tools\flexsdk\frameworks\libs\mx\mx.swc" />
-    <element path="" />
-    <element path="libs\worrysprite.swc" />
   </libraryPaths>
   <!-- External Libraries -->
   <externalLibraryPaths>

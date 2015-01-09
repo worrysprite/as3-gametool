@@ -1,6 +1,10 @@
 package controller
 {
 	import com.worrysprite.manager.SwfLoaderManager;
+	import com.worrysprite.model.image.ActionVo;
+	import com.worrysprite.model.image.AEPFile;
+	import com.worrysprite.utils.FileUtils;
+	import enum.ErrorCodeEnum;
 	import enum.ThreadMessageEnum;
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
@@ -10,8 +14,7 @@ package controller
 	import flash.filesystem.FileStream;
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
-	import model.ActionVo;
-	import model.AEPFile;
+	import flash.utils.Endian;
 	/**
 	 * 特效/动作打包
 	 * @author WorrySprite
@@ -34,6 +37,7 @@ package controller
 			actionList = actions;
 			processActionIndex = 0;
 			outputFile = new AEPFile(AEPFile.TYPE_ACTION, quality);
+			WorkerProject.sendMessage([ThreadMessageEnum.STATE_START]);
 			processNextAction();
 		}
 		
@@ -41,7 +45,11 @@ package controller
 		{
 			if (processActionIndex == actionList.length)
 			{
-				releaseAndComplete();
+				if (writeFile())
+				{
+					cleanup();
+					WorkerProject.sendMessage([ThreadMessageEnum.STATE_COMPLETE]);
+				}
 			}
 			else
 			{
@@ -76,28 +84,22 @@ package controller
 			for (var i:int = 0; i < fileList.length; ++i)
 			{
 				file = fileList[i];
-				if (!file.isDirectory)
+				if (FileUtils.isImage(file))
 				{
-					if (file.extension)
-					{
-						ext = file.extension.toLowerCase();
-						if (ext == "png" || ext == "jpg")
-						{
-							srcFileList.push(file);
-							loader.queueLoad(file.url, onLoaded, [action, isEffect]);
-						}
-					}
+					srcFileList.push(file);
+					loader.queueLoad(file.url, onLoaded, [action, isEffect]);
 				}
 			}
 			if (srcFileList.length == 0)
 			{
+				cleanup();
+				WorkerProject.sendMessage([ThreadMessageEnum.STATE_ERROR, ErrorCodeEnum.EMPTY_RESOURCE_DIRECTORY]);
+			}
+			else
+			{
 				if (isEffect)
 				{
-					releaseAndComplete(false);
-				}
-				else
-				{
-					processNextAction();
+					WorkerProject.sendMessage([ThreadMessageEnum.STATE_START]);
 				}
 			}
 		}
@@ -134,7 +136,10 @@ package controller
 				outputFile.addAction(action);
 				if (isEffect)
 				{
-					releaseAndComplete();
+					if (writeFile())
+					{
+						WorkerProject.sendMessage([ThreadMessageEnum.STATE_COMPLETE]);
+					}
 				}
 				else
 				{
@@ -143,31 +148,24 @@ package controller
 			}
 		}
 		
-		private static function releaseAndComplete(write:Boolean = true):void
+		private static function writeFile():Boolean
 		{
-			if (write)
+			var stream:FileStream = new FileStream();
+			stream.endian = Endian.LITTLE_ENDIAN;
+			try
 			{
-				//WorkerProject.trace("write to file, " + destFile.nativePath);
-				var stream:FileStream = new FileStream();
-				try
-				{
-					stream.open(destFile, FileMode.WRITE);
-				}
-				catch (e:Error)
-				{
-					WorkerProject.sendMessage([ThreadMessageEnum.STATE_ERROR, e.errorID]);
-				}
+				stream.open(destFile, FileMode.WRITE);
 				outputFile.writeToFile(stream);
-				stream.close();
 			}
-			srcDir = null;
-			destFile = null;
-			outputFile = null;
-			actionList = null;
-			processActionIndex = 0;
-			numLoaded = 0;
-			//WorkerProject.trace("complete!");
-			WorkerProject.sendMessage([ThreadMessageEnum.STATE_COMPLETE]);
+			catch (e:Error)
+			{
+				stream.close();
+				cleanup();
+				WorkerProject.sendMessage([ThreadMessageEnum.STATE_ERROR, e.errorID]);
+				return false;
+			}
+			stream.close();
+			return true;
 		}
 		
 		public static function packEffect(srcDirURL:String, destFileURL:String, quality:int, interval:int):void
@@ -183,6 +181,17 @@ package controller
 			action.offsetXs = new Vector.<int>();
 			action.offsetYs = new Vector.<int>();
 			processFiles(srcDir.getDirectoryListing(), action, true);
+		}
+		
+		private static function cleanup():void
+		{
+			srcDir = null;
+			destFile = null;
+			actionList = null;
+			srcFileList.length = 0;
+			outputFile = null;
+			processActionIndex = 0;
+			numLoaded = 0;
 		}
 	}
 

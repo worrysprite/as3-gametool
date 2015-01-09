@@ -1,5 +1,7 @@
 package
 {
+	import com.worrysprite.model.image.ActionVo;
+	import controller.BitmapScaleController;
 	import controller.CompressPNGController;
 	import controller.CutBitmapController;
 	import controller.EffectPackController;
@@ -10,7 +12,6 @@ package
 	import flash.net.registerClassAlias;
 	import flash.system.MessageChannel;
 	import flash.system.Worker;
-	import model.ActionVo;
 	/**
 	 * 工作线程
 	 * @author WorrySprite
@@ -58,6 +59,10 @@ package
 					case ThreadMessageEnum.COMMAND_PACK_EFFECT:
 						EffectPackController.packEffect(msg[1], msg[2], msg[3], msg[4]);
 						break;
+						
+					case ThreadMessageEnum.COMMAND_SCALE_BITMAP:
+						BitmapScaleController.scale(msg[1], msg[2], msg[3], msg[4]);
+						break;
 				}
 			}
 		}
@@ -72,5 +77,4 @@ package
 			_instance.stateChannel.send([ThreadMessageEnum.STATE_TRACE, info]);
 		}
 	}
-
 }

@@ -1,9 +1,174 @@
 <?xml version="1.0" encoding="utf-8"?>
-<s:NavigatorContent xmlns:fx="http://ns.adobe.com/mxml/2009" 
-					xmlns:s="library://ns.adobe.com/flex/spark" 
+<s:NavigatorContent xmlns:fx="http://ns.adobe.com/mxml/2009"
+					xmlns:s="library://ns.adobe.com/flex/spark"
 					xmlns:mx="library://ns.adobe.com/flex/mx"
-					label="动作/特效预览" width="530" height="576">
-	<fx:Declarations>
-		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
-	</fx:Declarations>
+					label="动作/特效预览" width="600" height="576"
+					creationComplete="onCreate(event)">
+	<fx:Style source="FontStyle.css"/>
+	<s:Label left="20" top="18" styleName="BigFont" text="资源路径"/>
+	<s:TextInput id="txSrc" left="98" right="100" top="15" styleName="DefaultFont" editable="false"/>
+	<s:Button id="pbBrowseSrc" right="20" top="15" width="70" label="浏览" click="onClick(event)"
+			  styleName="BigFont"/>
+	
+	<s:DropDownList id="ddlAction" left="20" top="50" height="21" styleName="BigFont" enabled="false" change="onActionChange(event)" />
+	<s:CheckBox id="cbLoop" left="140" top="48" label="循环" styleName="BigFont" change="update()" enabled="{player!=null}"/>
+	<s:CheckBox id="cbReverse" left="200" top="48" label="反向播放" styleName="BigFont" change="update()" enabled="{player!=null}"/>
+	<s:ToggleButton id="pbPlay" left="300" top="50" width="70" label="播放" styleName="BigFont" change="update()" enabled="{player!=null}"/>
+	
+	<s:HSlider id="hsFrameIndex" minimum="1" left="20" right="100" top="85" enabled="false" change="changeFrame()" />
+	<s:TextInput id="txFrameIndex" right="20" top="78" width="70" styleName="DefaultFont" textAlign="center" editable="false" text="{hsFrameIndex.value}" />
+	
+	<s:Scroller left="20" right="20" top="120" bottom="15">
+		<s:Group>
+			<mx:UIComponent id="container" />
+		</s:Group>
+	</s:Scroller>
+	<s:NumericStepper id="nsFrameInterval" value="33" left="485" top="50" change="onIntervalChange(event)"
+						maximum="5000" minimum="10" styleName="DefaultFont" enabled="{player!=null}" />
+	<s:Label left="390" top="53" styleName="BigFont" text="帧间隔(毫秒)"/>
+	<fx:Script>
+		<![CDATA[
+			import com.worrysprite.effect.ActionPlayer;
+			import com.worrysprite.manager.BinaryLoaderManager;
+			import com.worrysprite.model.image.ActionVo;
+			import com.worrysprite.model.image.JNGFile;
+			import com.worrysprite.utils.FileUtils;
+			import flash.events.Event;
+			import flash.events.MouseEvent;
+			import flash.filesystem.File;
+			import flash.net.FileFilter;
+			import flash.net.URLLoaderDataFormat;
+			import mx.collections.ArrayCollection;
+			import mx.events.FlexEvent;
+			
+			private var srcFile:File;
+			[Bindable]
+			private var player:ActionPlayer;
+			private var jngFile:JNGFile;
+			
+			private function onCreate(event:FlexEvent):void
+			{
+				srcFile = new File();
+				srcFile.addEventListener(Event.SELECT, onFileSelected);
+			}
+			
+			private function onFileSelected(e:Event):void
+			{
+				txSrc.text = srcFile.nativePath;
+				cleanup();
+				var ext:String = FileUtils.getLowerCaseExt(srcFile);
+				if (ext == "jng")
+				{
+					BinaryLoaderManager.getInstance().loadNow(srcFile.url, URLLoaderDataFormat.BINARY, onLoaded);
+				}
+				else if (ext == "aep")
+				{
+					player = new ActionPlayer();
+					player.onEffectLoaded = onActionLoaded;
+					player.onEnterFrame = enterFrame;
+					player.onComplete = onPlayComplete;
+					player.effectURL = srcFile.url;
+				}
+			}
+			
+			private function onLoaded(fileData:ByteArray):void
+			{
+				jngFile = new JNGFile();
+				jngFile.readFromFile(fileData);
+				hsFrameIndex.enabled = true;
+			}
+			
+			private function onActionLoaded():void
+			{
+				ddlAction.enabled = player.actionCount > 1;
+				if (ddlAction.enabled)
+				{
+					var collection:ArrayCollection = new ArrayCollection();
+					var actionList:Vector.<ActionVo> = player.actionList;
+					for (var i:int = 0; i < actionList.length; ++i)
+					{
+						collection.addItem(actionList[i].directory);
+					}
+					ddlAction.dataProvider = collection;
+					ddlAction.selectedIndex = 0;
+				}
+				nsFrameInterval.value = player.currentAction.interval;
+				
+				update();
+				container.addChild(player);
+				hsFrameIndex.enabled = true;
+				hsFrameIndex.maximum = player.totalFrames;
+			}
+			
+			private function onClick(e:MouseEvent):void
+			{
+				srcFile.browseForOpen("打开", [new FileFilter("Image Packages", "*.jng;*aep")]);
+			}
+			
+			private function onActionChange(event:Event):void
+			{
+				player.actionName = ddlAction.selectedItem;
+				nsFrameInterval.value = player.currentAction.interval;
+				hsFrameIndex.maximum = player.totalFrames;
+			}
+			
+			private function onIntervalChange(event:Event):void
+			{
+				player.frameRate = 1000 / nsFrameInterval.value;
+			}
+			
+			private function changeFrame():void
+			{
+				player.currentFrame = hsFrameIndex.value;
+			}
+			
+			private function update():void
+			{
+				player.totalLoop = cbLoop.selected ? int.MAX_VALUE : 1;
+				if (pbPlay.selected)
+				{
+					if (cbReverse.selected)
+					{
+						player.playRevers();
+					}
+					else
+					{
+						player.play();
+					}
+				}
+				else
+				{
+					player.stop();
+				}
+			}
+			
+			private function enterFrame():void
+			{
+				hsFrameIndex.value = player.currentFrame;
+			}
+			
+			private function onPlayComplete():void
+			{
+				pbPlay.selected = false;
+			}
+			
+			private function cleanup():void
+			{
+				txFrameIndex.text = "";
+				ddlAction.enabled = false;
+				hsFrameIndex.enabled = false;
+				//imBmp.source = null;
+				if (player)
+				{
+					player.stop();
+					container.removeChild(player);
+					player = null;
+				}
+				if (jngFile)
+				{
+					jngFile = null;
+				}
+			}
+		]]>
+	</fx:Script>
 </s:NavigatorContent>

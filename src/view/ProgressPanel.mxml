@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<s:Panel xmlns:fx="http://ns.adobe.com/mxml/2009" 
-		 xmlns:s="library://ns.adobe.com/flex/spark" 
-		 xmlns:mx="library://ns.adobe.com/flex/mx" width="400" height="100"
-		 title="处理中">
+<s:Panel xmlns:fx="http://ns.adobe.com/mxml/2009"
+		 xmlns:s="library://ns.adobe.com/flex/spark"
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 width="400" height="100" styleName="DefaultFont" title="处理中">
+	<fx:Style source="FontStyle.css"/>
 	<fx:Declarations>
 		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
 	</fx:Declarations>
-	<mx:ProgressBar id="progress" top="15" width="350" horizontalCenter="0" mode="manual" />
+	<mx:ProgressBar id="progress" top="15" width="350" horizontalCenter="0" mode="manual"
+					styleName="DefaultFont"/>
 	<fx:Script>
 		<![CDATA[
 			public function setProgressInfo(value:Number, total:Number, tip:String):void

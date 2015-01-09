@@ -1,24 +1,147 @@
 <?xml version="1.0" encoding="utf-8"?>
-<s:NavigatorContent xmlns:fx="http://ns.adobe.com/mxml/2009" 
-					xmlns:s="library://ns.adobe.com/flex/spark" 
+<s:NavigatorContent xmlns:fx="http://ns.adobe.com/mxml/2009"
+					xmlns:s="library://ns.adobe.com/flex/spark"
 					xmlns:mx="library://ns.adobe.com/flex/mx"
-					label="图片缩放" width="530" height="576">
-	<fx:Declarations>
-		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
-	</fx:Declarations>
+					label="图片缩放" creationComplete="onCreate(event)">
+	<fx:Style source="FontStyle.css"/>
 	<s:Label left="20" top="18" styleName="BigFont" text="资源路径"/>
-	<s:TextInput left="98" top="15" width="310"/>
-	<s:Button left="433" top="15" label="浏览" styleName="BigFont"/>
-	<s:Label left="20" top="115" styleName="BigFont" text="压缩品质"/>
-	<s:HSlider left="98" top="118" width="310" maximum="100" minimum="1" value="80"/>
-	<s:TextInput left="433" top="111" width="70" text="80" textAlign="center"/>
-	<s:Label x="20" y="51" styleName="BigFont" text="输出路径"/>
-	<s:TextInput left="98" top="48" width="310"/>
-	<s:Button x="433" y="49" label="浏览" styleName="BigFont"/>
-	<s:CheckBox left="20" top="73" label="直接覆盖原文件" styleName="BigFont"/>
-	<mx:HRule y="104" width="500" horizontalCenter="0"/>
-	<s:Button top="175" width="100" height="30" label="缩放" horizontalCenter="0"
+	<s:TextInput id="txSrc" left="98" right="100" top="15" styleName="DefaultFont"/>
+	<s:Button id="pbBrowseSrc" right="20" top="15" width="70" label="浏览" click="onClick(event)"
 			  styleName="BigFont"/>
+	
+	<s:Label left="20" top="51" styleName="BigFont" text="输出路径"/>
+	<s:TextInput id="txDest" left="98" right="100" top="48" enabled="{!isOverrideSrc}"
+				 styleName="DefaultFont"/>
+	<s:Button id="pbBrowseDest" right="20" top="49" label="浏览" click="onClick(event)"
+			  enabled="{!isOverrideSrc}" styleName="BigFont"/>
+	
+	<s:CheckBox id="overrideSrc" left="20" top="76" label="直接覆盖原文件"
+				change="{isOverrideSrc = !isOverrideSrc}" styleName="BigFont"/>
+	<mx:HRule left="20" right="20" top="104"/>
+	
+	<s:Label left="20" top="115" styleName="BigFont" text="压缩品质"/>
+	<s:HSlider id="hsQuality" left="98" right="100" top="118" change="onQualityChange(event)"
+			   maximum="101" minimum="1" value="{quality}"/>
+	<s:TextInput id="txQuality" right="20" top="111" width="70" change="onQualityChange(event)"
+				 styleName="DefaultFont" text="80" textAlign="center"/>
+	
 	<s:Label left="20" top="145" styleName="BigFont" text="缩放百分比"/>
-	<s:NumericStepper left="110" top="140" width="80" maximum="500" minimum="5" value="50" />
+	<s:NumericStepper id="nsPercent" left="110" top="140" width="80" maximum="{MAX_SCALE_SIZE}"
+					  minimum="{MIN_SCALE_SIZE}" styleName="DefaultFont" value="50"/>
+	<s:Button id="pbScale" top="175" width="100" height="30" label="缩放" horizontalCenter="0"
+						styleName="BigFont" click="onClick(event)"/>
+	<fx:Script>
+		<![CDATA[
+			import com.worrysprite.utils.FileUtils;
+			import enum.ThreadMessageEnum;
+			import flash.events.Event;
+			import flash.events.MouseEvent;
+			import flash.filesystem.File;
+			import mx.controls.Alert;
+			import mx.events.FlexEvent;
+			
+			private static const MIN_SCALE_SIZE:int = 1;
+			private static const MAX_SCALE_SIZE:int = 1000;
+			
+			[Bindable]
+			private var isOverrideSrc:Boolean;
+			[Bindable]
+			private var quality:int = 80;
+			
+			private var srcDir:File;
+			private var destDir:File;
+			
+			private function onCreate(event:FlexEvent):void
+			{
+				srcDir = new File();
+				srcDir.addEventListener(Event.SELECT, onDirSelected);
+				destDir = new File();
+				destDir.addEventListener(Event.SELECT, onDirSelected);
+			}
+			
+			private function onDirSelected(e:Event):void
+			{
+				if(e.currentTarget == srcDir)
+				{
+					txSrc.text = srcDir.nativePath;
+				}
+				else if(e.currentTarget == destDir)
+				{
+					txDest.text = destDir.nativePath;
+				}
+			}
+			
+			private function onClick(e:MouseEvent):void
+			{
+				switch (e.target)
+				{
+					case pbBrowseSrc:
+						srcDir.browseForDirectory("选择资源目录");
+						break;
+					
+					case pbBrowseDest:
+						destDir.browseForDirectory("选择输出目录");
+						break;
+					
+					case pbScale:
+						startScale();
+						break;
+				}
+			}
+			
+			private function onQualityChange(event:Event):void
+			{
+				switch (event.currentTarget)
+				{
+					case txQuality:
+						var value:int = int(txQuality.text);
+						if (value < 1)
+						{
+							value = 1;
+						}
+						else if(value > 101)
+						{
+							value = 101;
+						}
+						quality = value;
+						break;
+					
+					case hsQuality:
+						quality = hsQuality.value;
+						break;
+				}
+				if (quality == 101)
+				{
+					txQuality.text = "无损";
+				}
+				else
+				{
+					txQuality.text = quality.toString();
+				}
+			}
+			
+			private function startScale():void
+			{
+				if (!FileUtils.checkDirValid(txSrc.text, srcDir))
+				{
+					Alert.show("无效的资源路径", "错误");
+					return;
+				}
+				if (isOverrideSrc)
+				{
+					destDir.url = srcDir.url;
+				}
+				else
+				{
+					if (!FileUtils.checkDirValid(txDest.text, destDir))
+					{
+						Alert.show("无效的输出路径", "错误");
+						return;
+					}
+				}
+				WorkerManager.sendMessage([ThreadMessageEnum.COMMAND_SCALE_BITMAP, srcDir.url, destDir.url, hsQuality.value, nsPercent.value]);
+			}
+			
+		]]>
+	</fx:Script>
 </s:NavigatorContent>

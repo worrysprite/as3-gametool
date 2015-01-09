@@ -2,11 +2,12 @@
 @namespace s "library://ns.adobe.com/flex/spark";
 @namespace mx "library://ns.adobe.com/flex/mx";
 
-global
+.DefaultFont
 {
 	fontFamily: "微软雅黑";
 }
 .BigFont
 {
 	fontSize: 16;
+	fontFamily: "微软雅黑";
 }

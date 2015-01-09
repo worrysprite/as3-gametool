@@ -29,6 +29,7 @@ package controller
 		
 		public static function split(srcDirURL:String, destDirURL:String, pieceWidth:int, pieceHeight:int, quality:int):void
 		{
+			var srcFile:File = new File(srcDirURL);
 			WorkerProject.trace("w:" + pieceWidth + ", h:" + pieceHeight + ", q:" + quality);
 			width = pieceWidth;
 			height = pieceHeight;
@@ -41,6 +42,7 @@ package controller
 				encoder = new JPEGEncoder(quality);
 			}
 			outputFile = new File(destDirURL);
+			WorkerProject.sendMessage([ThreadMessageEnum.STATE_START]);
 			var tip:String = "正在加载源图片";
 			WorkerProject.trace(tip);
 			WorkerProject.sendMessage([ThreadMessageEnum.STATE_PROGRESS, 0, 100, tip]);
@@ -76,23 +78,40 @@ package controller
 					WorkerProject.sendMessage([ThreadMessageEnum.STATE_PROGRESS, currentProgress, totalProgress, tip]);
 					
 					var stream:FileStream = new FileStream();
-					stream.open(outputFile.resolvePath(fileName), FileMode.WRITE);
-					rect.x = j * width;
-					if (j == numCols - 1)
+					try
 					{
-						rect.right = bmpData.width;
+						stream.open(outputFile.resolvePath(fileName), FileMode.WRITE);
+						rect.x = j * width;
+						if (j == numCols - 1)
+						{
+							rect.right = bmpData.width;
+						}
+						else
+						{
+							rect.width = width;
+						}
+						WorkerProject.trace("rect: x=" + rect.x + ", y=" + rect.y + ", w=" + rect.width + ", h=" + rect.height);
+						stream.writeBytes(encoder.encodeByteArray(bmpData.getPixels(rect), rect.width, rect.height));
 					}
-					else
+					catch (e:Error)
 					{
-						rect.width = width;
+						stream.close();
+						cleanup();
+						WorkerProject.sendMessage([ThreadMessageEnum.STATE_ERROR, e.errorID]);
+						return;
 					}
-					WorkerProject.trace("rect: x=" + rect.x + ", y=" + rect.y + ", w=" + rect.width + ", h=" + rect.height);
-					stream.writeBytes(encoder.encodeByteArray(bmpData.getPixels(rect), rect.width, rect.height));
 					stream.close();
 					++currentProgress;
 				}
 			}
+			cleanup();
 			WorkerProject.sendMessage([ThreadMessageEnum.STATE_COMPLETE]);
+		}
+		
+		private static function cleanup():void
+		{
+			outputFile = null;
+			encoder = null;
 		}
 	}
 }
