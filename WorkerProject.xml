@@ -37,8 +37,8 @@
       <path-element>C:\Program Files (x86)\FlashDevelop\Library\AS3\classes</path-element>
     </source-path>
     <library-path append="true">
-      <path-element>C:\Program Files (x86)\FlashDevelop\Tools\flexsdk\frameworks\libs\mx\mx.swc</path-element>
-      <!-- <path-element>E:\GitHub\worryspriteTools\libs\worrysprite.swc</path-element> -->
+      <!-- <path-element>C:\Users\WorrySprite\AppData\Local\FlashDevelop\Apps\flexsdk\4.6.0\frameworks\libs\mx\mx.swc</path-element> -->
+      <path-element>E:\GitHub\worryspriteTools\libs\worrysprite.swc</path-element>
     </library-path>
   </compiler>
   <file-specs>

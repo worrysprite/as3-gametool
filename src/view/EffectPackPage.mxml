@@ -279,9 +279,10 @@
 				}
 				else
 				{
-					if (!FileUtils.checkDirValid(txDest.text, destFile))
+					var ext:String = FileUtils.splitNameAndExt(txDest.text)[1];
+					if (!ext || ext.toLowerCase() != "aep")
 					{
-						Alert.show("无效的输出路径", "错误");
+						Alert.show("必须输出为aep格式的文件", "错误");
 						return;
 					}
 				}
@@ -298,7 +299,12 @@
 				}
 				else if (type == TYPE_EFFECT)
 				{
-					WorkerManager.sendMessage([ThreadMessageEnum.COMMAND_PACK_EFFECT, srcDir.url, destFile.url, hsQuality.value, int(txEffectInterval.text)]);
+					var interval:int = int(txEffectInterval.text);
+					if (interval <= 0)
+					{
+						Alert.show("请输入帧间隔", "错误");
+					}
+					WorkerManager.sendMessage([ThreadMessageEnum.COMMAND_PACK_EFFECT, srcDir.url, destFile.url, hsQuality.value, interval]);
 				}
 			}
 		]]>

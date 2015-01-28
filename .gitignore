@@ -4,6 +4,7 @@
 .settings/
 obj/
 air/
+bin/
 bin/CutPixel.swf
 
 # Project files, i.e. `.project`, `.actionScriptProperties` and `.flexProperties`

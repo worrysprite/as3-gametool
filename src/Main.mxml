@@ -65,7 +65,7 @@
 				switch(msg[0])
 				{
 					case ThreadMessageEnum.STATE_START:
-						PopUpManager.addPopUp(popup, this);
+						PopUpManager.addPopUp(popup, this, true);
 						PopUpManager.centerPopUp(popup);
 						break;
 					

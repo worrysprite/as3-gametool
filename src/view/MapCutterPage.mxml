@@ -30,8 +30,12 @@
 	<s:TextInput id="txPieceHeight" left="230" top="140" width="80" change="onSizeChange(event)"
 				 restrict="0-9" styleName="DefaultFont" text="200"/>
 	
-	<s:Button id="pbSplit" top="175" width="100" height="30" label="切割" horizontalCenter="0"
-			  styleName="BigFont" click="onClick(event)" />
+	<s:Label left="20" top="180" styleName="BigFont" text="命名规则"/>
+	<s:TextInput id="txNaming" left="96" right="20" top="177" restrict="^&lt;&gt;&quot;\\/:*?|"
+				 toolTip="命名规则可填写任意可作为文件名的字符，可以使用%dir%表示输出路径的文件夹名，%row0%表示从0开始的行号，%row1%表示从1开始的行号，类似的%col00%表示从0开始的两位数列号，%col01%表示从1开始的两位数列号。"/>
+	<s:Button id="pbSplit" top="220" width="100" height="30" label="切割" click="onClick(event)"
+			  horizontalCenter="0" styleName="BigFont"/>
+	
 	<fx:Script>
 		<![CDATA[
 			import com.worrysprite.utils.FileUtils;
@@ -146,7 +150,7 @@
 					}
 				}
 				WorkerManager.sendMessage([ThreadMessageEnum.COMMAND_CUT_MAP, srcImageFile.url,
-									destDir.url, int(txPieceWidth.text), int(txPieceHeight.text), hsQuality.value]);
+									destDir.url, txNaming.text, int(txPieceWidth.text), int(txPieceHeight.text), hsQuality.value]);
 			}
 			
 			private function onSizeChange(e:TextOperationEvent):void

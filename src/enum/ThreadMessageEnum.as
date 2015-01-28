@@ -41,9 +41,10 @@ package enum
 		 */
 		public static const COMMAND_COMPRESS_PNG:int = 101;
 		/**
-		 * 切割图片消息，含有5个参数
+		 * 切割图片消息，含有6个参数
 		 * String	源文件夹url
 		 * String	目标文件夹url
+		 * String	命名规则
 		 * int	切片宽
 		 * int	切片高
 		 * int	品质
