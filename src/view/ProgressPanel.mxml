@@ -8,7 +8,7 @@
 		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
 	</fx:Declarations>
 	<mx:ProgressBar id="progress" top="15" width="350" horizontalCenter="0" mode="manual"
-					styleName="DefaultFont"/>
+					styleName="DefaultFont" />
 	<fx:Script>
 		<![CDATA[
 			public function setProgressInfo(value:Number, total:Number, tip:String):void

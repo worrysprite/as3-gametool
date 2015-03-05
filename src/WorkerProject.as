@@ -61,7 +61,7 @@ package
 						break;
 						
 					case ThreadMessageEnum.COMMAND_SCALE_BITMAP:
-						BitmapScaleController.scale(msg[1], msg[2], msg[3], msg[4]);
+						BitmapScaleController.scale(msg[1], msg[2], msg[3], msg[4], msg[5], msg[6]);
 						break;
 				}
 			}

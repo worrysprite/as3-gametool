@@ -23,39 +23,38 @@ package controller
 		private static var srcFileList:Vector.<File> = new Vector.<File>();
 		private static var outputDir:File;
 		private static var encoder:IImageEncoder;
+		private static var pngEncoder:PNGEncoder;
 		private static var scaleValue:Number;
 		private static var matrix:Matrix = new Matrix();
 		private static var numLoaded:int;
 		
-		public static function scale(srcDirURL:String, destDirURL:String, quality:int, percent:int):void
+		public static function scale(srcDirURL:String, destDirURL:String, recursive:Boolean, quality:int, pngNotChange:Boolean, percent:int):void
 		{
 			var srcDir:File = new File(srcDirURL);
-			outputDir = new File(destDirURL);
+			if (destDirURL)
+			{
+				outputDir = new File(destDirURL);
+			}
+			pngNotChange = pngNotChange;
 			if (quality <= 100)
 			{
 				encoder = new JPEGEncoder(quality);
+				if (pngNotChange)
+				{
+					pngEncoder = new PNGEncoder();
+				}
 			}
 			else
 			{
 				encoder = new PNGEncoder();
 			}
 			matrix.identity();
-			scaleValue = percent / 100;
+			scaleValue = percent / 10000;	//为了提高精度，改成了万分比
 			matrix.scale(scaleValue, scaleValue);
 			
 			numLoaded = 0;
-			var allFiles:Array = srcDir.getDirectoryListing();
-			var file:File;
-			var loader:SwfLoaderManager = SwfLoaderManager.getInstance();
-			for (var i:int = 0; i < allFiles.length; ++i)
-			{
-				file = allFiles[i];
-				if (FileUtils.isImage(file))
-				{
-					srcFileList.push(file);
-					loader.queueLoad(file.url, onLoaded, [file]);
-				}
-			}
+			loadFiles(srcDir, recursive);
+			
 			if (srcFileList.length <= 0)	//如果未加载任何文件
 			{
 				cleanup();
@@ -64,6 +63,26 @@ package controller
 			else
 			{
 				WorkerProject.sendMessage([ThreadMessageEnum.STATE_START]);
+			}
+		}
+		
+		private static function loadFiles(dir:File, recursive:Boolean):void
+		{
+			var allFiles:Array = dir.getDirectoryListing();
+			var file:File;
+			var loader:SwfLoaderManager = SwfLoaderManager.getInstance();
+			for (var i:int = 0; i < allFiles.length; ++i)
+			{
+				file = allFiles[i];
+				if (recursive && file.isDirectory)
+				{
+					loadFiles(file, recursive);
+				}
+				if (FileUtils.isImage(file))
+				{
+					srcFileList.push(file);
+					loader.queueLoad(file.url, onLoaded, [file]);
+				}
 			}
 		}
 		
@@ -87,7 +106,13 @@ package controller
 			var destBmp:BitmapData;
 			try
 			{
-				destBmp = new BitmapData(srcBmp.width * scaleValue, srcBmp.height * scaleValue);
+				var w:int = srcBmp.width * scaleValue;
+				var h:int = srcBmp.height * scaleValue;
+				if (w < 1 || h < 1)	//缩小后若小于1像素则忽略
+				{
+					return;
+				}
+				destBmp = new BitmapData(w, h, true, 0);
 			}
 			catch (e:Error)
 			{
@@ -97,14 +122,31 @@ package controller
 			}
 			destBmp.draw(srcBmp, matrix, null, null, null, true);
 			
-			var ext:String = encoder is PNGEncoder ? ".png" : ".jpg";
-			//写入文件
+			var enc:IImageEncoder;
+			if (pngEncoder && FileUtils.isPNG(srcFile))	//PNG保持原有品质
+			{
+				enc = pngEncoder;
+			}
+			else
+			{
+				enc = encoder;
+			}
+			
+			//编码并写入文件
+			var ext:String = enc is PNGEncoder ? ".png" : ".jpg";
 			var fileName:String = FileUtils.splitNameAndExt(srcFile.name)[0] + ext;
 			var stream:FileStream = new FileStream();
 			try
 			{
-				stream.open(outputDir.resolvePath(fileName), FileMode.WRITE);
-				stream.writeBytes(encoder.encode(destBmp));
+				if (outputDir)
+				{
+					stream.open(outputDir.resolvePath(fileName), FileMode.WRITE);
+				}
+				else	//直接覆盖源文件
+				{
+					stream.open(srcFile.parent.resolvePath(fileName), FileMode.WRITE);
+				}
+				stream.writeBytes(enc.encode(destBmp));
 			}
 			catch (e:Error)
 			{
@@ -129,6 +171,7 @@ package controller
 			srcFileList.length = 0;
 			numLoaded = 0;
 			encoder = null;
+			pngEncoder = null;
 		}
 	}
 

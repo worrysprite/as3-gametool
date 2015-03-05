@@ -67,10 +67,12 @@ package enum
 		 */
 		public static const COMMAND_PACK_EFFECT:int = 104;
 		/**
-		 * 缩放图片，含有4个参数
+		 * 缩放图片，含有6个参数
 		 * String	源文件夹url
 		 * String	目标文件夹url
+		 * Boolean	递归处理子文件夹
 		 * int	品质
+		 * Boolean	源PNG不改变品质
 		 * int	缩放百分比
 		 */
 		public static const COMMAND_SCALE_BITMAP:int = 105;

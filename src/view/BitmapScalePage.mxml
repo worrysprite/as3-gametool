@@ -17,6 +17,7 @@
 	
 	<s:CheckBox id="overrideSrc" left="20" top="76" label="直接覆盖原文件"
 				change="{isOverrideSrc = !isOverrideSrc}" styleName="BigFont"/>
+	<s:CheckBox id="cbRecursive" left="160" top="76" label="递归子文件夹" styleName="BigFont"/>
 	<mx:HRule left="20" right="20" top="104"/>
 	
 	<s:Label left="20" top="115" styleName="BigFont" text="压缩品质"/>
@@ -24,11 +25,12 @@
 			   maximum="101" minimum="1" value="{quality}"/>
 	<s:TextInput id="txQuality" right="20" top="111" width="70" change="onQualityChange(event)"
 				 styleName="DefaultFont" text="80" textAlign="center"/>
+	<s:CheckBox id="cbPNGNotChange" left="20" top="140" label="PNG不改变品质" styleName="BigFont"/>
 	
-	<s:Label left="20" top="145" styleName="BigFont" text="缩放百分比"/>
-	<s:NumericStepper id="nsPercent" left="110" top="140" width="80" maximum="{MAX_SCALE_SIZE}"
-					  minimum="{MIN_SCALE_SIZE}" styleName="DefaultFont" value="50"/>
-	<s:Button id="pbScale" top="175" width="100" height="30" label="缩放" horizontalCenter="0"
+	<s:Label left="20" top="181" styleName="BigFont" text="缩放万分比"/>
+	<s:NumericStepper id="nsPercent" left="110" top="176" width="80" maximum="{MAX_SCALE_SIZE}"
+					  minimum="{MIN_SCALE_SIZE}" styleName="DefaultFont" value="5000"/>
+	<s:Button id="pbScale" top="215" width="100" height="30" label="缩放" horizontalCenter="0"
 						styleName="BigFont" click="onClick(event)"/>
 	<fx:Script>
 		<![CDATA[
@@ -40,8 +42,8 @@
 			import mx.controls.Alert;
 			import mx.events.FlexEvent;
 			
-			private static const MIN_SCALE_SIZE:int = 1;
-			private static const MAX_SCALE_SIZE:int = 1000;
+			private static const MIN_SCALE_SIZE:int = 100;
+			private static const MAX_SCALE_SIZE:int = 100000;
 			
 			[Bindable]
 			private var isOverrideSrc:Boolean;
@@ -127,19 +129,17 @@
 					Alert.show("无效的资源路径", "错误");
 					return;
 				}
-				if (isOverrideSrc)
-				{
-					destDir.url = srcDir.url;
-				}
-				else
+				var outURL:String;
+				if (!isOverrideSrc)
 				{
 					if (!FileUtils.checkDirValid(txDest.text, destDir))
 					{
 						Alert.show("无效的输出路径", "错误");
 						return;
 					}
+					outURL = destDir.url;
 				}
-				WorkerManager.sendMessage([ThreadMessageEnum.COMMAND_SCALE_BITMAP, srcDir.url, destDir.url, hsQuality.value, nsPercent.value]);
+				WorkerManager.sendMessage([ThreadMessageEnum.COMMAND_SCALE_BITMAP, srcDir.url, outURL, cbRecursive.selected, hsQuality.value, cbPNGNotChange.selected, nsPercent.value]);
 			}
 			
 		]]>
