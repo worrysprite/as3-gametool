@@ -1,5 +1,5 @@
-@echo ********************************************************************************
-@echo 生成WorkerProject
+@echo off
+echo 生成WorkerProject
+call bat\SetupSDK.bat
 mxmlc -load-config+=WorkerProject.xml +configname=air -debug=false
-@echo ********************************************************************************
 pause

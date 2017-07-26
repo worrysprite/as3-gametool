@@ -27,10 +27,17 @@
 			   maximum="101" minimum="1" value="{quality}"/>
 	<s:TextInput id="txQuality" right="20" top="111" width="70" change="onQualityChange(event)"
 				 restrict="0-9" styleName="DefaultFont" text="80" textAlign="center"/>
+	
+	<s:Label left="20" top="146" styleName="BigFont" text="压缩算法"/>
+	<s:RadioButton id="rbOrgBytearrayImagesJpegencoder" left="100" top="145" label="org.bytearray.images.JPEGEncoder"
+					styleName="DefaultFont" click="onRadioButtonClick(event)"
+					selected="{jpegAlgorithm==JpegAlgorithmEnum.ALGORITHM_ORG_BYTEARRAY_IMAGES_JPEGENCODER}" />
+	<s:RadioButton id="rbBitmapdataEncode" left="338" top="145" label="BitmapData.encode" styleName="DefaultFont"
+					click="onRadioButtonClick(event)" selected="{jpegAlgorithm==JpegAlgorithmEnum.ALGORITHM_BITMAPDATA_ENCODE}" />
 
-	<s:RadioButton id="rbAction" left="20" top="142" label="动作打包" selected="{type==TYPE_ACTION}"
+	<s:RadioButton id="rbAction" left="20" top="172" label="动作打包" selected="{type==TYPE_ACTION}"
 				   styleName="BigFont" click="onRadioButtonClick(event)" />
-	<s:BorderContainer left="20" right="20" top="170" bottom="140" borderVisible="true"
+	<s:BorderContainer left="20" right="20" top="200" bottom="140" borderVisible="true"
 					   dropShadowVisible="true">
 		<s:DataGrid id="dgAction" left="15" right="15" top="12" bottom="100"
 					enabled="{type==TYPE_ACTION}" requestedRowCount="4"
@@ -76,6 +83,7 @@
 		<![CDATA[
 			import com.worrysprite.model.image.ActionVo;
 			import com.worrysprite.utils.FileUtils;
+			import enum.JpegAlgorithmEnum;
 			import enum.ThreadMessageEnum;
 			import events.ThreadEvent;
 			import flash.display.BitmapData;
@@ -94,7 +102,10 @@
 
 			[Bindable]
 			private var type:int = TYPE_ACTION;
-
+			
+			[Bindable]
+			private var jpegAlgorithm:int = JpegAlgorithmEnum.ALGORITHM_ORG_BYTEARRAY_IMAGES_JPEGENCODER;
+			
 			[Bindable]
 			private var isUseSrcPath:Boolean;
 			[Bindable]
@@ -151,6 +162,14 @@
 
 					case rbEffect:
 						type = TYPE_EFFECT;
+						break;
+						
+					case rbOrgBytearrayImagesJpegencoder:
+						jpegAlgorithm = JpegAlgorithmEnum.ALGORITHM_ORG_BYTEARRAY_IMAGES_JPEGENCODER;
+						break;
+						
+					case rbBitmapdataEncode:
+						jpegAlgorithm = JpegAlgorithmEnum.ALGORITHM_BITMAPDATA_ENCODE;
 						break;
 				}
 			}
@@ -294,7 +313,8 @@
 					}
 					else
 					{
-						WorkerManager.sendMessage([ThreadMessageEnum.COMMAND_PACK_ACTION, srcDir.url, destFile.url, hsQuality.value, actionList.source.slice()]);
+						WorkerManager.sendMessage([ThreadMessageEnum.COMMAND_PACK_ACTION, srcDir.url, destFile.url,
+													hsQuality.value, jpegAlgorithm, actionList.source.slice()]);
 					}
 				}
 				else if (type == TYPE_EFFECT)
@@ -304,7 +324,8 @@
 					{
 						Alert.show("请输入帧间隔", "错误");
 					}
-					WorkerManager.sendMessage([ThreadMessageEnum.COMMAND_PACK_EFFECT, srcDir.url, destFile.url, hsQuality.value, interval]);
+					WorkerManager.sendMessage([ThreadMessageEnum.COMMAND_PACK_EFFECT, srcDir.url, destFile.url,
+												hsQuality.value, jpegAlgorithm, interval]);
 				}
 			}
 		]]>

@@ -25,16 +25,24 @@
 			   maximum="101" minimum="1" value="{quality}"/>
 	<s:TextInput id="txQuality" right="20" top="111" width="70" change="onQualityChange(event)"
 				 styleName="DefaultFont" text="80" textAlign="center"/>
-	<s:CheckBox id="cbPNGNotChange" left="20" top="140" label="PNG不改变品质" styleName="BigFont"/>
 	
-	<s:Label left="20" top="181" styleName="BigFont" text="缩放万分比"/>
-	<s:NumericStepper id="nsPercent" left="110" top="176" width="80" maximum="{MAX_SCALE_SIZE}"
+	<s:Label left="20" top="146" styleName="BigFont" text="压缩算法"/>
+	<s:RadioButton id="rbOrgBytearrayImagesJpegencoder" left="100" top="145" label="org.bytearray.images.JPEGEncoder"
+					styleName="DefaultFont" click="onRadioButtonClick(event)"
+					selected="{jpegAlgorithm==JpegAlgorithmEnum.ALGORITHM_ORG_BYTEARRAY_IMAGES_JPEGENCODER}" />
+	<s:RadioButton id="rbBitmapdataEncode" left="338" top="145" label="BitmapData.encode" styleName="DefaultFont"
+					click="onRadioButtonClick(event)" selected="{jpegAlgorithm==JpegAlgorithmEnum.ALGORITHM_BITMAPDATA_ENCODE}" />
+	<s:CheckBox id="cbPNGNotChange" left="20" top="174" label="PNG不改变品质" styleName="BigFont"/>
+	
+	<s:Label left="20" top="212" styleName="BigFont" text="缩放万分比"/>
+	<s:NumericStepper id="nsPercent" left="110" top="207" width="80" maximum="{MAX_SCALE_SIZE}"
 					  minimum="{MIN_SCALE_SIZE}" styleName="DefaultFont" value="5000"/>
-	<s:Button id="pbScale" top="215" width="100" height="30" label="缩放" horizontalCenter="0"
+	<s:Button id="pbScale" top="250" width="100" height="30" label="缩放" horizontalCenter="0"
 						styleName="BigFont" click="onClick(event)"/>
 	<fx:Script>
 		<![CDATA[
 			import com.worrysprite.utils.FileUtils;
+			import enum.JpegAlgorithmEnum;
 			import enum.ThreadMessageEnum;
 			import flash.events.Event;
 			import flash.events.MouseEvent;
@@ -44,6 +52,9 @@
 			
 			private static const MIN_SCALE_SIZE:int = 100;
 			private static const MAX_SCALE_SIZE:int = 100000;
+			
+			[Bindable]
+			private var jpegAlgorithm:int = JpegAlgorithmEnum.ALGORITHM_ORG_BYTEARRAY_IMAGES_JPEGENCODER;
 			
 			[Bindable]
 			private var isOverrideSrc:Boolean;
@@ -87,6 +98,20 @@
 					
 					case pbScale:
 						startScale();
+						break;
+				}
+			}
+
+			private function onRadioButtonClick(event:MouseEvent):void
+			{
+				switch(event.currentTarget)
+				{
+					case rbOrgBytearrayImagesJpegencoder:
+						jpegAlgorithm = JpegAlgorithmEnum.ALGORITHM_ORG_BYTEARRAY_IMAGES_JPEGENCODER;
+						break;
+						
+					case rbBitmapdataEncode:
+						jpegAlgorithm = JpegAlgorithmEnum.ALGORITHM_BITMAPDATA_ENCODE;
 						break;
 				}
 			}
@@ -139,7 +164,8 @@
 					}
 					outURL = destDir.url;
 				}
-				WorkerManager.sendMessage([ThreadMessageEnum.COMMAND_SCALE_BITMAP, srcDir.url, outURL, cbRecursive.selected, hsQuality.value, cbPNGNotChange.selected, nsPercent.value]);
+				WorkerManager.sendMessage([ThreadMessageEnum.COMMAND_SCALE_BITMAP, srcDir.url, outURL, cbRecursive.selected,
+											hsQuality.value, jpegAlgorithm, cbPNGNotChange.selected, nsPercent.value]);
 			}
 			
 		]]>

@@ -1,16 +1,18 @@
 package controller
 {
 	import com.worrysprite.manager.SwfLoaderManager;
+	import enum.JpegAlgorithmEnum;
 	import enum.ThreadMessageEnum;
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
+	import flash.display.JPEGEncoderOptions;
 	import flash.filesystem.File;
 	import flash.filesystem.FileMode;
 	import flash.filesystem.FileStream;
+	import flash.geom.Point;
 	import flash.geom.Rectangle;
-	import mx.graphics.codec.IImageEncoder;
-	import mx.graphics.codec.JPEGEncoder;
-	import mx.graphics.codec.PNGEncoder;
+	import org.bytearray.images.JPEGEncoder;
+	import org.bytearray.images.PNGEncoder;
 	/**
 	 * 位图切片
 	 * @author WorrySprite
@@ -19,7 +21,9 @@ package controller
 	{
 		private static var width:int;
 		private static var height:int;
-		private static var encoder:IImageEncoder;
+		private static var pngEncoder:PNGEncoder;
+		private static var jpegEncoder:JPEGEncoder;
+		private static var jpegEncoderOptions:JPEGEncoderOptions;
 		private static var outputFile:File;
 		private static var naming:String;
 		private static var rowIndex:int;
@@ -30,25 +34,31 @@ package controller
 			
 		}
 		
-		public static function split(srcDirURL:String, destDirURL:String, namingRegular:String, pieceWidth:int, pieceHeight:int, quality:int):void
+		public static function split(srcDirURL:String, destDirURL:String, namingRegular:String,
+										pieceWidth:int, pieceHeight:int, quality:int, jpegAlgorithm:int):void
 		{
 			var srcFile:File = new File(srcDirURL);
-			WorkerProject.trace("w:" + pieceWidth + ", h:" + pieceHeight + ", q:" + quality);
 			width = pieceWidth;
 			height = pieceHeight;
 			if (quality > 100)
 			{
-				encoder = new PNGEncoder();
+				pngEncoder = new PNGEncoder();
 			}
 			else
 			{
-				encoder = new JPEGEncoder(quality);
+				if (jpegAlgorithm == JpegAlgorithmEnum.ALGORITHM_ORG_BYTEARRAY_IMAGES_JPEGENCODER)
+				{
+					jpegEncoder = new JPEGEncoder(quality);
+				}
+				else if (jpegAlgorithm == JpegAlgorithmEnum.ALGORITHM_BITMAPDATA_ENCODE)
+				{
+					jpegEncoderOptions = new JPEGEncoderOptions(quality);
+				}
 			}
 			outputFile = new File(destDirURL);
 			naming = namingRegular.replace("%dir%", outputFile.name);
 			WorkerProject.sendMessage([ThreadMessageEnum.STATE_START]);
 			var tip:String = "正在加载源图片";
-			WorkerProject.trace(tip);
 			WorkerProject.sendMessage([ThreadMessageEnum.STATE_PROGRESS, 0, 100, tip]);
 			SwfLoaderManager.getInstance().loadNow(srcDirURL, onLoaded);
 		}
@@ -58,11 +68,15 @@ package controller
 			var bmpData:BitmapData = bitmap.bitmapData;
 			var numCols:int = Math.ceil(bmpData.width / width);
 			var numRows:int = Math.ceil(bmpData.height / height);
-			WorkerProject.trace("col:" + numCols + ", row:" + numRows);
 			var currentProgress:int = 1;
 			var totalProgress:int = numCols * numRows + 1;
-			var ext:String = encoder is PNGEncoder ? ".png" : ".jpg";
+			var ext:String = pngEncoder ? ".png" : ".jpg";
 			var rect:Rectangle = new Rectangle(0, 0, width, height);
+			if (jpegEncoder)
+			{
+				var destBmp:BitmapData = new BitmapData(width, height);
+				var zeroPoint:Point = new Point();
+			}
 			for (var i:int = 0; i < numRows; ++i)
 			{
 				rect.y = i * height;
@@ -80,7 +94,6 @@ package controller
 					colIndex = j;
 					var fileName:String = getFileName() + ext;
 					var tip:String = "正在处理" + fileName;
-					WorkerProject.trace(tip);
 					WorkerProject.sendMessage([ThreadMessageEnum.STATE_PROGRESS, currentProgress, totalProgress, tip]);
 					
 					var stream:FileStream = new FileStream();
@@ -96,8 +109,22 @@ package controller
 						{
 							rect.width = width;
 						}
-						WorkerProject.trace("rect: x=" + rect.x + ", y=" + rect.y + ", w=" + rect.width + ", h=" + rect.height);
-						stream.writeBytes(encoder.encodeByteArray(bmpData.getPixels(rect), rect.width, rect.height));
+						if (pngEncoder)
+						{
+							stream.writeBytes(pngEncoder.encodeByteArray(bmpData.getPixels(rect), rect.width, rect.height));
+						}
+						else
+						{
+							if (jpegEncoder)
+							{
+								destBmp.copyPixels(bmpData, rect, zeroPoint);
+								stream.writeBytes(jpegEncoder.encode(destBmp));
+							}
+							else if (jpegEncoderOptions)
+							{
+								stream.writeBytes(bmpData.encode(rect, jpegEncoderOptions));
+							}
+						}
 					}
 					catch (e:Error)
 					{
@@ -150,7 +177,8 @@ package controller
 		private static function cleanup():void
 		{
 			outputFile = null;
-			encoder = null;
+			pngEncoder = null;
+			jpegEncoderOptions = null;
 		}
 	}
 }

@@ -41,27 +41,27 @@ package
 			while (commandChannel.messageAvailable)
 			{
 				var msg:Array = commandChannel.receive() as Array;
-				//trace("command recv:" + msg[0]);
+				trace("command recv:" + msg);
 				switch(msg[0])
 				{
 					case ThreadMessageEnum.COMMAND_COMPRESS_PNG:
-						CompressPNGController.compress(msg[1], msg[2], msg[3], msg[4]);
+						CompressPNGController.compress(msg[1], msg[2], msg[3], msg[4], msg[5]);
 						break;
 						
 					case ThreadMessageEnum.COMMAND_CUT_MAP:
-						CutBitmapController.split(msg[1], msg[2], msg[3], msg[4], msg[5], msg[6]);
+						CutBitmapController.split(msg[1], msg[2], msg[3], msg[4], msg[5], msg[6], msg[7]);
 						break;
 						
 					case ThreadMessageEnum.COMMAND_PACK_ACTION:
-						EffectPackController.packAction(msg[1], msg[2], msg[3], msg[4]);
+						EffectPackController.packAction(msg[1], msg[2], msg[3], msg[4], msg[5]);
 						break;
 						
 					case ThreadMessageEnum.COMMAND_PACK_EFFECT:
-						EffectPackController.packEffect(msg[1], msg[2], msg[3], msg[4]);
+						EffectPackController.packEffect(msg[1], msg[2], msg[3], msg[4], msg[5]);
 						break;
 						
 					case ThreadMessageEnum.COMMAND_SCALE_BITMAP:
-						BitmapScaleController.scale(msg[1], msg[2], msg[3], msg[4], msg[5], msg[6]);
+						BitmapScaleController.scale(msg[1], msg[2], msg[3], msg[4], msg[5], msg[6], msg[7]);
 						break;
 				}
 			}

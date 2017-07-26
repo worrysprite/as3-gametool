@@ -33,45 +33,50 @@ package enum
 		public static const STATE_START:int = 5;
 
 		/**
-		 * 压缩PNG消息，含有4个参数：
+		 * 压缩PNG消息，含有5个参数：
 		 * String	源文件夹url
 		 * String	目标文件夹url
 		 * int	品质
+		 * int	压缩算法
 		 * Boolean	合并为单个文件
 		 */
 		public static const COMMAND_COMPRESS_PNG:int = 101;
 		/**
-		 * 切割图片消息，含有6个参数
+		 * 切割图片消息，含有7个参数
 		 * String	源文件夹url
 		 * String	目标文件夹url
 		 * String	命名规则
 		 * int	切片宽
 		 * int	切片高
 		 * int	品质
+		 * int	压缩算法
 		 */
 		public static const COMMAND_CUT_MAP:int = 102;
 		/**
-		 * 打包动作，含有4个参数
+		 * 打包动作，含有5个参数
 		 * String	源文件夹url
 		 * String	目标文件夹url
 		 * int	品质
+		 * int	压缩算法
 		 * Array	动作数组（ActionVo对象数组）
 		 */
 		public static const COMMAND_PACK_ACTION:int = 103;
 		/**
-		 * 打包特效，含有4个参数
+		 * 打包特效，含有5个参数
 		 * String	源文件夹url
 		 * String	目标文件夹url
 		 * int	品质
+		 * int	压缩算法
 		 * int	帧间隔（毫秒）
 		 */
 		public static const COMMAND_PACK_EFFECT:int = 104;
 		/**
-		 * 缩放图片，含有6个参数
+		 * 缩放图片，含有7个参数
 		 * String	源文件夹url
 		 * String	目标文件夹url
 		 * Boolean	递归处理子文件夹
 		 * int	品质
+		 * int	压缩算法
 		 * Boolean	源PNG不改变品质
 		 * int	缩放百分比
 		 */

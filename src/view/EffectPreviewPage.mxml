@@ -33,6 +33,8 @@
 			import com.worrysprite.model.image.ActionVo;
 			import com.worrysprite.model.image.JNGFile;
 			import com.worrysprite.utils.FileUtils;
+			import flash.display.Bitmap;
+			import flash.display.BitmapData;
 			import flash.events.Event;
 			import flash.events.MouseEvent;
 			import flash.filesystem.File;
@@ -45,6 +47,8 @@
 			[Bindable]
 			private var player:ActionPlayer;
 			private var jngFile:JNGFile;
+			private var jngView:Bitmap;
+			private var jngBitmaps:Vector.<BitmapData>;
 			
 			private function onCreate(event:FlexEvent):void
 			{
@@ -59,6 +63,7 @@
 				var ext:String = FileUtils.getLowerCaseExt(srcFile);
 				if (ext == "jng")
 				{
+					jngView = new Bitmap();
 					BinaryLoaderManager.getInstance().loadNow(srcFile.url, URLLoaderDataFormat.BINARY, onLoaded);
 				}
 				else if (ext == "aep")
@@ -75,7 +80,11 @@
 			{
 				jngFile = new JNGFile();
 				jngFile.readFromFile(fileData);
+				jngBitmaps = jngFile.bitmaps;
 				hsFrameIndex.enabled = true;
+				hsFrameIndex.maximum = jngBitmaps.length;
+				container.addChild(jngView);
+				jngView.bitmapData = jngBitmaps[0];
 			}
 			
 			private function onActionLoaded():void
@@ -119,7 +128,14 @@
 			
 			private function changeFrame():void
 			{
-				player.currentFrame = hsFrameIndex.value;
+				if (player)
+				{
+					player.currentFrame = hsFrameIndex.value;
+				}
+				else if (jngFile)
+				{
+					jngView.bitmapData = jngBitmaps[hsFrameIndex.value - 1];
+				}
 			}
 			
 			private function update():void
@@ -161,12 +177,21 @@
 				if (player)
 				{
 					player.stop();
-					container.removeChild(player);
+					if (player.parent == container)
+					{
+						container.removeChild(player);
+					}
 					player = null;
 				}
 				if (jngFile)
 				{
+					if (jngView.parent == container)
+					{
+						container.removeChild(jngView);
+					}
 					jngFile = null;
+					jngView = null;
+					jngBitmaps = null;
 				}
 			}
 		]]>

@@ -23,13 +23,15 @@ package controller
 		private static var numLoaded:int;
 		private static var outputFile:JNGFile;
 		private static var _quality:int;
+		private static var _jpegAlgorithm:int;
 		
-		public static function compress(srcDirURL:String, destDirURL:String, quality:int, isSingleFile:Boolean):void
+		public static function compress(srcDirURL:String, destDirURL:String, quality:int, jpegAlgorithm:int, isSingleFile:Boolean):void
 		{
 			var srcDir:File = new File(srcDirURL);
 			outputDir = new File(destDirURL);
 			_quality = quality;
 			single = isSingleFile;
+			_jpegAlgorithm = jpegAlgorithm;
 			
 			numLoaded = 0;
 			var allFiles:Array = srcDir.getDirectoryListing();
@@ -67,15 +69,22 @@ package controller
 				return;
 			}
 			var tip:String = "正在处理" + srcFile.nativePath;
-			WorkerProject.trace(tip);
 			WorkerProject.sendMessage([ThreadMessageEnum.STATE_PROGRESS, numLoaded, srcFileList.length, tip]);
 			
 			++numLoaded;
 			if (!outputFile)
 			{
 				outputFile = new JNGFile(_quality);
+				outputFile.jpegAlgorithm = _jpegAlgorithm;
 			}
-			outputFile.addBitmap(Bitmap(data).bitmapData);
+			try
+			{
+				outputFile.addBitmap(Bitmap(data).bitmapData, srcFile.name);
+			}
+			catch (e:Error)
+			{
+				WorkerProject.trace("error" + e.getStackTrace());
+			}
 			
 			if (!single)	//不合并单个文件就直接写入文件
 			{
