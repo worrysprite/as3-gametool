@@ -5,8 +5,8 @@ package org.bytearray.images
 	
 	
 	/**
-	 * @author: Thibault Imbert 
-	 * 
+	 * @author: Thibault Imbert
+	 *
 	 * @see: http://www.bytearray.org/?p=775
 	 * @see: http://www.bytearray.org/wp-content/projects/fastjpeg/JPEGEncoder.as
 	 *
@@ -258,7 +258,7 @@ package org.bytearray.images
 			const I8:int = 8;
 			const I64:int = 64;
 			for (i=0; i<I8; ++i)
-			{	
+			{
                 d0 = data[int(dataOff)];
 				d1 = data[int(dataOff+1)];
 				d2 = data[int(dataOff+2)];
@@ -655,6 +655,11 @@ package org.bytearray.images
 
 final class BitString
 {
+	public function BitString()
+	{
+		
+	}
+	
 	public var len:int = 0;
 	public var val:int = 0;
 }

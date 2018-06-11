@@ -30,13 +30,14 @@ package controller
 		private static var processActionIndex:int;
 		private static var numLoaded:int;
 		
-		public static function packAction(srcDirURL:String, destFileURL:String, quality:int, actions:Array):void
+		public static function packAction(srcDirURL:String, destFileURL:String, quality:int, jpegAlgorithm:int, actions:Array):void
 		{
 			srcDir = new File(srcDirURL);
 			destFile = new File(destFileURL);
 			actionList = actions;
 			processActionIndex = 0;
 			outputFile = new AEPFile(AEPFile.TYPE_ACTION, quality);
+			outputFile.jpegAlgorithm = jpegAlgorithm;
 			WorkerProject.sendMessage([ThreadMessageEnum.STATE_START]);
 			processNextAction();
 		}
@@ -57,7 +58,6 @@ package controller
 				action.bitmaps = new Vector.<BitmapData>();
 				action.offsetXs = new Vector.<int>();
 				action.offsetYs = new Vector.<int>();
-				//WorkerProject.trace("index=" + action.index + ", dir=" + action.directory + ", interval=" + action.interval);
 				var tip:String = "正在处理" + action.directory;
 				WorkerProject.sendMessage([ThreadMessageEnum.STATE_PROGRESS, processActionIndex, actionList.length, tip]);
 				
@@ -107,7 +107,6 @@ package controller
 		private static function onLoaded(data:DisplayObject, action:ActionVo, isEffect:Boolean = false):void
 		{
 			var srcFile:File = srcFileList[numLoaded];
-			//WorkerProject.trace("打包" + srcFile.nativePath);
 			if (isEffect)
 			{
 				var tip:String = "正在处理" + srcFile.nativePath;
@@ -132,7 +131,6 @@ package controller
 			}
 			if (++numLoaded == srcFileList.length)
 			{
-				//WorkerProject.trace("addAction, length=" + action.bitmaps.length);
 				outputFile.addAction(action);
 				if (isEffect)
 				{
@@ -168,11 +166,12 @@ package controller
 			return true;
 		}
 		
-		public static function packEffect(srcDirURL:String, destFileURL:String, quality:int, interval:int):void
+		public static function packEffect(srcDirURL:String, destFileURL:String, quality:int, jpegAlgorithm:int, interval:int):void
 		{
 			srcDir = new File(srcDirURL);
 			destFile = new File(destFileURL);
 			outputFile = new AEPFile(AEPFile.TYPE_EFFECT, quality);
+			outputFile.jpegAlgorithm = jpegAlgorithm;
 			
 			var action:ActionVo = new ActionVo();
 			action.interval = interval;
