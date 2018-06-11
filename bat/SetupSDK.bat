@@ -1,7 +1,7 @@
 :user_configuration
 
 :: Path to Flex SDK
-set FLEX_SDK=C:\Users\WorrySprite\AppData\Local\FlashDevelop\Apps\flexsdk\4.6.0
+set FLEX_SDK=C:\Users\WorrySprite\AppData\Local\FlashDevelop\Apps\flex_sdk
 
 
 :validation

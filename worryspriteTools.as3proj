@@ -57,7 +57,7 @@
   </libraryPaths>
   <!-- External Libraries -->
   <externalLibraryPaths>
-    <!-- example: <element path="..." /> -->
+    <element path="C:\Users\WorrySprite\AppData\Local\FlashDevelop\Apps\flex_sdk\frameworks\libs\mx\mx.swc" />
   </externalLibraryPaths>
   <!-- Runtime Shared Libraries -->
   <rslPaths>
