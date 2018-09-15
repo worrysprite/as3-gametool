@@ -33,15 +33,13 @@
     <verbose-stacktraces>true</verbose-stacktraces>
     <source-path append="true">
       <path-element>src</path-element>
-      <path-element>C:\Program Files (x86)\FlashDevelop\Library\AS3\classes</path-element>
     </source-path>
     <library-path append="true">
-      <!-- <path-element>C:\Users\WorrySprite\AppData\Local\FlashDevelop\Apps\flexsdk\4.6.0\frameworks\libs\mx\mx.swc</path-element> -->
       <path-element>libs\worrysprite.swc</path-element>
     </library-path>
   </compiler>
   <file-specs>
     <path-element>src\WorkerProject.as</path-element>
   </file-specs>
-  <output>E:\GitHub\worryspriteTools\src\WorkerProject.swf</output>
+  <output>src\WorkerProject.swf</output>
 </flex-config>

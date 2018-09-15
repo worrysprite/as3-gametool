@@ -7,9 +7,9 @@
 :: NOTICE: all paths are relative to project root
 
 :: Your certificate information
-set CERT_NAME="worryspriteTools"
+set CERT_NAME="gametool"
 set CERT_PASS=fd
-set CERT_FILE="bat\worryspriteTools.p12"
+set CERT_FILE="bat\gametool.p12"
 set SIGNING_OPTIONS=-storetype pkcs12 -keystore %CERT_FILE% -storepass %CERT_PASS%
 
 :: Application descriptor
@@ -20,11 +20,11 @@ set APP_DIR=bin
 set FILE_OR_DIR=-C %APP_DIR% .
 
 :: Your application ID (must match <id> of Application descriptor)
-set APP_ID=worryspriteTools
+set APP_ID=gametool
 
 :: Output
 set AIR_PATH=air
-set AIR_NAME=worryspriteTools
+set AIR_NAME=gametool
 
 
 :validation
