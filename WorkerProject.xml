@@ -32,17 +32,14 @@
 	<omit-trace-statements>false</omit-trace-statements>
     <verbose-stacktraces>true</verbose-stacktraces>
     <source-path append="true">
-      <path-element>D:\GitHub\worryspriteTools\src</path-element>
-      <path-element>D:\GitHub\worrysprite\src</path-element>
-      <path-element>C:\Program Files (x86)\FlashDevelop\Library\AS3\classes</path-element>
+      <path-element>src</path-element>
     </source-path>
     <library-path append="true">
-      <!-- <path-element>C:\Users\WorrySprite\AppData\Local\FlashDevelop\Apps\flexsdk\4.6.0\frameworks\libs\mx\mx.swc</path-element> -->
-      <path-element>D:\GitHub\worryspriteTools\libs\worrysprite.swc</path-element>
+      <path-element>libs\worrysprite.swc</path-element>
     </library-path>
   </compiler>
   <file-specs>
-    <path-element>D:\GitHub\worryspriteTools\src\WorkerProject.as</path-element>
+    <path-element>src\WorkerProject.as</path-element>
   </file-specs>
-  <output>D:\GitHub\worryspriteTools\src\WorkerProject.swf</output>
+  <output>src\WorkerProject.swf</output>
 </flex-config>

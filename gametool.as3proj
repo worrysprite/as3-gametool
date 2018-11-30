@@ -8,7 +8,7 @@
     <movie fps="30" />
     <movie width="1360" />
     <movie height="748" />
-    <movie version="23" />
+    <movie version="28" />
     <movie minorVersion="0" />
     <movie platform="AIR" />
     <movie background="#FFFFFF" />
@@ -54,10 +54,11 @@
   <!-- SWC Libraries -->
   <libraryPaths>
     <element path="C:\Users\Worry\AppData\Local\FlashDevelop\Apps\flexsdk\4.6.0\frameworks\libs\mx\mx.swc" />
+    <element path="libs\worrysprite.swc" />
   </libraryPaths>
   <!-- External Libraries -->
   <externalLibraryPaths>
-    <!-- example: <element path="..." /> -->
+    <element path="C:\Users\WorrySprite\AppData\Local\FlashDevelop\Apps\flex_sdk\frameworks\libs\mx\mx.swc" />
   </externalLibraryPaths>
   <!-- Runtime Shared Libraries -->
   <rslPaths>

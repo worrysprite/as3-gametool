@@ -1,16 +1,16 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <application xmlns="http://ns.adobe.com/air/application/23.0">
-  <id>worryspriteTools</id>
+  <id>gametool</id>
   <versionNumber>1.1</versionNumber>
-  <filename>worryspriteTools</filename>
+  <filename>gametool</filename>
   <name>
-    <text xml:lang="zh">worryspriteTools</text>
+    <text xml:lang="zh">gametool</text>
     <text xml:lang="en">
     </text>
   </name>
   <initialWindow>
-    <title>worryspriteTools</title>
-    <content>worryspriteTools.swf</content>
+    <title>gametool</title>
+    <content>gametool.swf</content>
     <systemChrome>standard</systemChrome>
     <transparent>false</transparent>
     <visible>true</visible>

@@ -1,15 +1,20 @@
-AnimationEditor
+AS3 game tool
 ===============
 
-as3 animation tools
+## AS3游戏工具
 
-先设置bat\SetupSDK.bat里的FlexSDK路径
-使用PackageApp.bat即可打包
+* 特效序列帧、动作序列帧打包，支持配置多动作多方向
+* 压缩打包PNG，将PNG的ARGB拆分成RGB和Alpha，把RGB压缩成JPG格式，把Alpha通道单独zip压缩
+* 位图切片，可以指定命名规则
+* 批量图片缩放
+* 更友好的交互，使用Worker进行后台线程处理，并同步进度到UI界面
 
-请使用Flash Pro CS5.5或更高版本
-特效打包可配合worrysprite的AS3库使用
-https://github.com/worrysprite/worrysprite
+> 特效播放需要配合[as3游戏库](https://github.com/worrysprite/worrysprite)
 
-有问题请联系worrysprite@gmail.com
+---
 
-2014/7/5	修改了jsfl使打包出来的swf支持跨域访问
+## build
+
+* 先设置bat\SetupSDK.bat里的FlexSDK路径
+* 使用WorkerProject.bat打包WorkerProject
+* 使用PackageApp.bat即可打包AIR格式安装包
