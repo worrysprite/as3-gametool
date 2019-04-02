@@ -19,8 +19,8 @@ package controller
 	 */
 	public class CutBitmapController
 	{
-		private static var width:int;
-		private static var height:int;
+		private static var width:int;		//切片宽
+		private static var height:int;		//切片高
 		private static var pngEncoder:PNGEncoder;
 		private static var jpegEncoder:JPEGEncoder;
 		private static var jpegEncoderOptions:JPEGEncoderOptions;
@@ -117,8 +117,17 @@ package controller
 						{
 							if (jpegEncoder)
 							{
-								destBmp.copyPixels(bmpData, rect, zeroPoint);
-								stream.writeBytes(jpegEncoder.encode(destBmp));
+								if (rect.width == width && rect.height == height)
+								{
+									destBmp.copyPixels(bmpData, rect, zeroPoint);
+									stream.writeBytes(jpegEncoder.encode(destBmp));
+								}
+								else
+								{
+									var tmpBmp:BitmapData = new BitmapData(rect.width, rect.height);
+									tmpBmp.copyPixels(bmpData, rect, zeroPoint);
+									stream.writeBytes(jpegEncoder.encode(tmpBmp));
+								}
 							}
 							else if (jpegEncoderOptions)
 							{

@@ -29,7 +29,7 @@
 	<fx:Script>
 		<![CDATA[
 			import com.worrysprite.effect.ActionPlayer;
-			import com.worrysprite.manager.BinaryLoaderManager;
+			import com.worrysprite.manager.LoaderManager;
 			import com.worrysprite.model.image.ActionVo;
 			import com.worrysprite.model.image.JNGFile;
 			import com.worrysprite.utils.FileUtils;
@@ -64,7 +64,7 @@
 				if (ext == "jng")
 				{
 					jngView = new Bitmap();
-					BinaryLoaderManager.getInstance().loadNow(srcFile.url, URLLoaderDataFormat.BINARY, onLoaded);
+					LoaderManager.getInstance().loadNow(srcFile.url, URLLoaderDataFormat.BINARY, onLoaded);
 				}
 				else if (ext == "aep")
 				{

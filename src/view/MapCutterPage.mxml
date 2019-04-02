@@ -38,7 +38,7 @@
 				 restrict="0-9" styleName="DefaultFont" text="200"/>
 	
 	<s:Label left="20" top="216" styleName="BigFont" text="命名规则"/>
-	<s:TextInput id="txNaming" left="96" right="20" top="213" restrict="^&lt;&gt;&quot;\\/:*?|"
+	<s:TextInput id="txNaming" left="96" right="20" top="213" restrict="^&lt;&gt;&quot;\\/:*?|" text="%row0%_%col0%" 
 				 toolTip="命名规则可填写任意可作为文件名的字符，可以使用%dir%表示输出路径的文件夹名，%row0%表示从0开始的行号，%row1%表示从1开始的行号，类似的%col00%表示从0开始的两位数列号，%col01%表示从1开始的两位数列号。"/>
 	<s:Button id="pbSplit" top="250" width="100" height="30" label="切割" click="onClick(event)"
 			  horizontalCenter="0" styleName="BigFont"/>

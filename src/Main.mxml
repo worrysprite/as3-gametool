@@ -37,7 +37,6 @@
 				WorkerManager.listener.addEventListener(ThreadEvent.THREAD_STATE, onThreadState);
 				popup = new ProgressPanel();
 				
-				
 				addEventListener(Event.ADDED_TO_STAGE, onAdded);
 			}
 			

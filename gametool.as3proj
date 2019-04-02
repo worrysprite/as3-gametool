@@ -4,11 +4,11 @@
   <output>
     <movie outputType="Application" />
     <movie input="" />
-    <movie path="bin\worryspriteTools.swf" />
+    <movie path="bin\gametool.swf" />
     <movie fps="30" />
     <movie width="1360" />
     <movie height="748" />
-    <movie version="28" />
+    <movie version="26" />
     <movie minorVersion="0" />
     <movie platform="AIR" />
     <movie background="#FFFFFF" />
@@ -16,7 +16,6 @@
   <!-- Other classes to be compiled into your SWF -->
   <classpaths>
     <class path="src" />
-    <class path="..\worrysprite\src" />
   </classpaths>
   <!-- Build options -->
   <build>
@@ -53,12 +52,12 @@
   </includeLibraries>
   <!-- SWC Libraries -->
   <libraryPaths>
-    <element path="C:\Users\Worry\AppData\Local\FlashDevelop\Apps\flexsdk\4.6.0\frameworks\libs\mx\mx.swc" />
-    <element path="libs\worrysprite.swc" />
+    <element path="$(FlexSDK)\frameworks\libs\mx\mx.swc" />
+    <element path="libs\as3-gamelib.swc" />
   </libraryPaths>
   <!-- External Libraries -->
   <externalLibraryPaths>
-    <element path="C:\Users\WorrySprite\AppData\Local\FlashDevelop\Apps\flex_sdk\frameworks\libs\mx\mx.swc" />
+    <!-- example: <element path="..." /> -->
   </externalLibraryPaths>
   <!-- Runtime Shared Libraries -->
   <rslPaths>
