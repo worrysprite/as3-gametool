@@ -1,5 +1,5 @@
 @echo off
-echo building WorkerProject
 call bat\SetupSDK.bat
-mxmlc -load-config+=WorkerProject.xml +configname=air -debug=false
+echo building WorkerProject
+mxmlc.bat -load-config+=WorkerProject.xml +configname=air -debug=false
 pause

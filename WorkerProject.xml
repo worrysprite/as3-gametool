@@ -2,16 +2,15 @@
 <flex-config>
   <target-player>11.9</target-player>
   <swf-version>22</swf-version>
-  <benchmark>false</benchmark>
   <static-link-runtime-shared-libraries>true</static-link-runtime-shared-libraries>
   <compiler>
     <define append="true">
       <name>CONFIG::debug</name>
-      <value>true</value>
+      <value>false</value>
     </define>
     <define append="true">
       <name>CONFIG::release</name>
-      <value>false</value>
+      <value>true</value>
     </define>
     <define append="true">
       <name>CONFIG::timeStamp</name>

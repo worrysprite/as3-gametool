@@ -1,8 +1,8 @@
 package controller
 {
-	import com.worrysprite.manager.SwfLoaderManager;
 	import com.worrysprite.model.image.JNGFile;
 	import com.worrysprite.utils.FileUtils;
+	import com.worrysprite.utils.LoaderQueue;
 	import enum.ErrorCodeEnum;
 	import enum.ThreadMessageEnum;
 	import flash.display.Bitmap;
@@ -24,6 +24,7 @@ package controller
 		private static var outputFile:JNGFile;
 		private static var _quality:int;
 		private static var _jpegAlgorithm:int;
+		private static var loader:LoaderQueue;
 		
 		public static function compress(srcDirURL:String, destDirURL:String, quality:int, jpegAlgorithm:int, isSingleFile:Boolean):void
 		{
@@ -36,14 +37,13 @@ package controller
 			numLoaded = 0;
 			var allFiles:Array = srcDir.getDirectoryListing();
 			var file:File;
-			var loader:SwfLoaderManager = SwfLoaderManager.getInstance();
 			for (var i:int = 0; i < allFiles.length; ++i)
 			{
 				file = allFiles[i];
 				if (FileUtils.isPNG(file))
 				{
 					srcFileList.push(file);
-					loader.queueLoad(file.url, onLoaded, [file]);
+					loader.loadImg(file.url, onLoaded, [file]);
 				}
 			}
 			if (srcFileList.length <= 0)	//如果未加载任何文件

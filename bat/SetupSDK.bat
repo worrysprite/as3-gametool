@@ -1,7 +1,7 @@
 :user_configuration
 
 :: Path to Flex SDK
-set FLEX_SDK=E:\flexsdk\4.6.0+28.0.0
+set FLEX_SDK=C:\Portable\FlashDevelop\Apps\flexsdk\4.6.0+28.0.0
 
 
 :validation

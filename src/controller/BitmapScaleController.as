@@ -1,7 +1,7 @@
 package controller
 {
-	import com.worrysprite.manager.SwfLoaderManager;
 	import com.worrysprite.utils.FileUtils;
+	import com.worrysprite.utils.LoaderQueue;
 	import enum.ErrorCodeEnum;
 	import enum.JpegAlgorithmEnum;
 	import enum.ThreadMessageEnum;
@@ -30,6 +30,7 @@ package controller
 		private static var matrix:Matrix = new Matrix();
 		private static var numLoaded:int;
 		private static var _jpegAlgorithm:int;
+		private static var loader:LoaderQueue = new LoaderQueue();
 		
 		public static function scale(srcDirURL:String, destDirURL:String, recursive:Boolean, quality:int, jpegAlgorithm:int, pngNotChange:Boolean, percent:int):void
 		{
@@ -76,7 +77,6 @@ package controller
 		{
 			var allFiles:Array = dir.getDirectoryListing();
 			var file:File;
-			var loader:SwfLoaderManager = SwfLoaderManager.getInstance();
 			for (var i:int = 0; i < allFiles.length; ++i)
 			{
 				file = allFiles[i];
@@ -87,7 +87,7 @@ package controller
 				if (FileUtils.isImage(file))
 				{
 					srcFileList.push(file);
-					loader.queueLoad(file.url, onLoaded, [file]);
+					loader.loadImg(file.url, onLoaded, [file]);
 				}
 			}
 		}

@@ -1,9 +1,9 @@
 package controller
 {
-	import com.worrysprite.manager.SwfLoaderManager;
 	import com.worrysprite.model.image.ActionVo;
 	import com.worrysprite.model.image.AEPFile;
 	import com.worrysprite.utils.FileUtils;
+	import com.worrysprite.utils.LoaderQueue;
 	import enum.ErrorCodeEnum;
 	import enum.ThreadMessageEnum;
 	import flash.display.Bitmap;
@@ -78,7 +78,8 @@ package controller
 		{
 			var file:File;
 			var ext:String;
-			var loader:SwfLoaderManager = SwfLoaderManager.getInstance();
+			var loader:LoaderQueue = new LoaderQueue();
+			loader.maxConcurrency = 1;
 			srcFileList.length = 0;
 			numLoaded = 0;
 			for (var i:int = 0; i < fileList.length; ++i)
@@ -87,7 +88,7 @@ package controller
 				if (FileUtils.isImage(file))
 				{
 					srcFileList.push(file);
-					loader.queueLoad(file.url, onLoaded, [action, isEffect]);
+					loader.loadImg(file.url, onLoaded, [action, isEffect]);
 				}
 			}
 			if (srcFileList.length == 0)
@@ -110,6 +111,7 @@ package controller
 			if (isEffect)
 			{
 				var tip:String = "正在处理" + srcFile.nativePath;
+				trace(tip);
 				WorkerProject.sendMessage([ThreadMessageEnum.STATE_PROGRESS, numLoaded, srcFileList.length, tip]);
 			}
 			

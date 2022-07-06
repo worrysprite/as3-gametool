@@ -10,7 +10,7 @@
 set CERT_NAME="gametool"
 set CERT_PASS=fd
 set CERT_FILE="bat\gametool.p12"
-set SIGNING_OPTIONS=-storetype pkcs12 -keystore %CERT_FILE% -storepass %CERT_PASS%
+set SIGNING_OPTIONS=-storetype pkcs12 -keystore %CERT_FILE% -storepass %CERT_PASS% -tsa "http://timestamp.digicert.com"
 
 :: Application descriptor
 set APP_XML=application.xml

@@ -518,7 +518,7 @@ package org.bytearray.images
 				writeBits(bitcode[pos]);
 			}
 			//Encode ACs
-			const end0pos:int = 63;
+			var end0pos:int = 63;
 			for (; (end0pos>0)&&(DU[end0pos]==0); end0pos--) {};
 			//end0pos = first element in reverse order !=0
 			if ( end0pos == 0) {

@@ -1,6 +1,6 @@
 package controller
 {
-	import com.worrysprite.manager.SwfLoaderManager;
+	import com.worrysprite.manager.LoaderManager;
 	import enum.JpegAlgorithmEnum;
 	import enum.ThreadMessageEnum;
 	import flash.display.Bitmap;
@@ -60,7 +60,7 @@ package controller
 			WorkerProject.sendMessage([ThreadMessageEnum.STATE_START]);
 			var tip:String = "正在加载源图片";
 			WorkerProject.sendMessage([ThreadMessageEnum.STATE_PROGRESS, 0, 100, tip]);
-			SwfLoaderManager.getInstance().loadNow(srcDirURL, onLoaded);
+			LoaderManager.getInstance().loadImage(srcDirURL, onLoaded);
 		}
 		
 		static private function onLoaded(bitmap:Bitmap):void

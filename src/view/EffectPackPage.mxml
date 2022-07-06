@@ -30,12 +30,12 @@
 	
 	<s:Label left="20" top="146" styleName="BigFont" text="压缩算法"/>
 	<s:RadioButton id="rbOrgBytearrayImagesJpegencoder" left="100" top="145" label="org.bytearray.images.JPEGEncoder"
-					styleName="DefaultFont" click="onRadioButtonClick(event)"
+					styleName="DefaultFont" click="onRadioButtonClick(event)" groupName="rg1"
 					selected="{jpegAlgorithm==JpegAlgorithmEnum.ALGORITHM_ORG_BYTEARRAY_IMAGES_JPEGENCODER}" />
-	<s:RadioButton id="rbBitmapdataEncode" left="338" top="145" label="BitmapData.encode" styleName="DefaultFont"
+	<s:RadioButton id="rbBitmapdataEncode" left="338" top="145" label="BitmapData.encode" styleName="DefaultFont" groupName="rg1"
 					click="onRadioButtonClick(event)" selected="{jpegAlgorithm==JpegAlgorithmEnum.ALGORITHM_BITMAPDATA_ENCODE}" />
 
-	<s:RadioButton id="rbAction" left="20" top="172" label="动作打包" selected="{type==TYPE_ACTION}"
+	<s:RadioButton id="rbAction" left="20" top="172" label="动作打包" selected="{type==TYPE_ACTION}" groupName="rg2"
 				   styleName="BigFont" click="onRadioButtonClick(event)" />
 	<s:BorderContainer left="20" right="20" top="200" bottom="140" borderVisible="true"
 					   dropShadowVisible="true">
@@ -68,7 +68,7 @@
 				  enabled="{type==TYPE_ACTION}" styleName="BigFont"/>
 	</s:BorderContainer>
 
-	<s:RadioButton id="rbEffect" left="20" bottom="110" height="24" label="特效打包"
+	<s:RadioButton id="rbEffect" left="20" bottom="110" height="24" label="特效打包" groupName="rg2"
 				   click="onRadioButtonClick(event)" selected="{type==TYPE_EFFECT}"
 				   styleName="BigFont"/>
 	<s:BorderContainer left="20" right="20" bottom="60" height="45" dropShadowVisible="true">
