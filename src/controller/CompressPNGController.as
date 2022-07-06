@@ -37,6 +37,7 @@ package controller
 			var allFiles:Array = srcDir.getDirectoryListing();
 			var file:File;
 			var loader:SwfLoaderManager = SwfLoaderManager.getInstance();
+			loader.maxConcurrency = 10;
 			for (var i:int = 0; i < allFiles.length; ++i)
 			{
 				file = allFiles[i];

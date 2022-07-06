@@ -79,6 +79,7 @@ package controller
 			var file:File;
 			var ext:String;
 			var loader:SwfLoaderManager = SwfLoaderManager.getInstance();
+			loader.maxConcurrency = 1;
 			srcFileList.length = 0;
 			numLoaded = 0;
 			for (var i:int = 0; i < fileList.length; ++i)
