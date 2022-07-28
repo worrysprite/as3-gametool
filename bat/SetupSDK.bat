@@ -1,8 +1,13 @@
+:: Set working dir
+cd %~dp0 & cd ..
+
 :user_configuration
 
 :: Path to Flex SDK
 set FLEX_SDK=C:\Portable\FlashDevelop\Apps\flexsdk\4.6.0+28.0.0
 
+:: Use FD supplied SDK path if executed from FD
+if exist "%FD_CUR_SDK%" set FLEX_SDK=%FD_CUR_SDK%
 
 :validation
 if not exist "%FLEX_SDK%\bin" goto flexsdk
@@ -18,5 +23,4 @@ if %PAUSE_ERRORS%==1 pause
 exit
 
 :succeed
-set PATH=%PATH%;%FLEX_SDK%\bin
-
+set PATH=%FLEX_SDK%\bin;%PATH%
